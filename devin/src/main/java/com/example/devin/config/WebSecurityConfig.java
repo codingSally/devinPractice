@@ -69,12 +69,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.cors().and().csrf().disable()
+                .headers().frameOptions().disable() // Required for H2 console
+                .and()
                 .authorizeRequests()
+                .antMatchers("/h2-console/**").permitAll() // Allow H2 console access
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/products").permitAll()
                 .antMatchers("/api/products/category/**").permitAll()
                 .antMatchers("/api/products/price/**").permitAll()
                 .antMatchers("/api/products/popular/**").permitAll()
+                .antMatchers("/api/products/{id}").permitAll() // Allow product detail access
                 .antMatchers("/api/products/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()

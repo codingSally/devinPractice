@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS products (
 
 -- Insert admin user (password: admin123)
 INSERT INTO users (username, password, role, created_at, updated_at) 
-VALUES ('admin', '$2a$10$EqKcp1WBKSHUZcfUhBqRpepG9X5bU9wtl.qyOZAysptXXDx5j.Tu6', 'admin', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES ('admin', '$2a$10$kPI6UJiAnBWAlt.TvQrjueQMyd9sy1/MWX21AIsHHbzN7HZ84mdVC', 'admin', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Insert sample products
 INSERT INTO products (product_name, description, price, inventory, image_path, category, popularity) VALUES

@@ -60,7 +60,7 @@ export default {
       error.value = '';
       
       try {
-        const response = await axios.post('http://localhost:8080/api/auth/login', {
+        const response = await axios.post('http://localhost:8081/api/auth/login', {
           username: values.username,
           password: values.password,
         });
