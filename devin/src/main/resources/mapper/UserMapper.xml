@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.devin.mapper.UserMapper">
+    <resultMap id="userResultMap" type="com.example.devin.model.User">
+        <id property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="role" column="role"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    
+    <select id="findByUsername" resultMap="userResultMap">
+        SELECT * FROM users WHERE username = #{username}
+    </select>
+    
+    <insert id="insert" parameterType="com.example.devin.model.User" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO users (username, password, role)
+        VALUES (#{username}, #{password}, #{role})
+    </insert>
+</mapper>

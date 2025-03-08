@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.devin.mapper.ProductMapper">
+    <resultMap id="productResultMap" type="com.example.devin.model.Product">
+        <id property="productId" column="product_id"/>
+        <result property="productName" column="product_name"/>
+        <result property="description" column="description"/>
+        <result property="price" column="price"/>
+        <result property="inventory" column="inventory"/>
+        <result property="imagePath" column="image_path"/>
+        <result property="category" column="category"/>
+        <result property="popularity" column="popularity"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    
+    <select id="findAll" resultMap="productResultMap">
+        SELECT * FROM products
+    </select>
+    
+    <select id="findById" resultMap="productResultMap">
+        SELECT * FROM products WHERE product_id = #{productId}
+    </select>
+    
+    <select id="findByCategory" resultMap="productResultMap">
+        SELECT * FROM products WHERE category = #{category}
+    </select>
+    
+    <select id="findByPriceRange" resultMap="productResultMap">
+        SELECT * FROM products WHERE price BETWEEN #{minPrice} AND #{maxPrice}
+    </select>
+    
+    <select id="findByPopularity" resultMap="productResultMap">
+        SELECT * FROM products ORDER BY popularity DESC LIMIT #{limit}
+    </select>
+    
+    <insert id="insert" parameterType="com.example.devin.model.Product" useGeneratedKeys="true" keyProperty="productId">
+        INSERT INTO products (product_name, description, price, inventory, image_path, category, popularity)
+        VALUES (#{productName}, #{description}, #{price}, #{inventory}, #{imagePath}, #{category}, #{popularity})
+    </insert>
+    
+    <update id="update" parameterType="com.example.devin.model.Product">
+        UPDATE products
+        SET product_name = #{productName},
+            description = #{description},
+            price = #{price},
+            inventory = #{inventory},
+            image_path = #{imagePath},
+            category = #{category},
+            popularity = #{popularity}
+        WHERE product_id = #{productId}
+    </update>
+    
+    <delete id="delete">
+        DELETE FROM products WHERE product_id = #{productId}
+    </delete>
+</mapper>
