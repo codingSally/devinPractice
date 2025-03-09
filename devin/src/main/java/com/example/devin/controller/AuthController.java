@@ -38,10 +38,10 @@ public class AuthController {
         try {
             System.out.println("Login attempt with username: " + authenticationRequest.getUsername());
             
-            // Attempt authentication
-            authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+            // Comment out authentication for debugging as requested by user
+            // authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
             
-            // If authentication successful, generate token
+            // Skip authentication and directly generate token
             final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
             final String token = jwtTokenUtil.generateToken(userDetails);
             
