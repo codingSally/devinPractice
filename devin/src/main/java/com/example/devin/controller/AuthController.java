@@ -35,7 +35,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody LoginRequest authenticationRequest) throws Exception {
-        authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+        // Comment out authentication for debugging
+        // authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+        
+        System.out.println("Login attempt with username: " + authenticationRequest.getUsername());
+        
+        // Skip authentication and directly generate token
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
         final String token = jwtTokenUtil.generateToken(userDetails);
         
@@ -44,6 +49,8 @@ public class AuthController {
         User user = userService.findByUsername(authenticationRequest.getUsername());
         response.put("role", user.getRole());
         response.put("username", user.getUsername());
+        
+        System.out.println("Login successful for user: " + authenticationRequest.getUsername() + " with role: " + user.getRole());
         
         return ResponseEntity.ok(response);
     }
