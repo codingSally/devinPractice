@@ -60,11 +60,18 @@ public class AuthController {
 
     private void authenticate(String username, String password) throws Exception {
         try {
+            System.out.println("Attempting to authenticate user: " + username);
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+            System.out.println("Authentication successful for user: " + username);
         } catch (DisabledException e) {
+            System.out.println("Authentication failed: User disabled");
             throw new Exception("USER_DISABLED", e);
         } catch (BadCredentialsException e) {
+            System.out.println("Authentication failed: Invalid credentials");
             throw new Exception("INVALID_CREDENTIALS", e);
+        } catch (Exception e) {
+            System.out.println("Authentication failed with unexpected error: " + e.getMessage());
+            throw new Exception("AUTHENTICATION_ERROR", e);
         }
     }
 
