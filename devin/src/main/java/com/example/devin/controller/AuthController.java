@@ -71,7 +71,6 @@ public class AuthController {
             throw new Exception("INVALID_CREDENTIALS", e);
         } catch (Exception e) {
             System.out.println("Authentication failed with unexpected error: " + e.getMessage());
-            e.printStackTrace();
             throw new Exception("AUTHENTICATION_ERROR", e);
         }
     }
