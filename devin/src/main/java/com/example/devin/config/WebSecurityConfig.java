@@ -36,15 +36,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
 
+    // Create a static final instance to avoid circular dependency
+    private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
+    
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return PASSWORD_ENCODER;
     }
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        // Use the bean-provided password encoder to ensure consistent encoding/decoding
-        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
+        // Use the static instance to avoid circular dependency
+        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(PASSWORD_ENCODER);
     }
 
     @Bean
