@@ -24,9 +24,7 @@ CREATE TABLE IF NOT EXISTS products (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert admin user with configurable password hash
-INSERT INTO users (username, password, role, created_at, updated_at) 
-VALUES ('admin', '${ADMIN_PASSWORD_HASH:${random.uuid}}', 'admin', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- Admin user will be created programmatically by DataInitializer
 
 -- Insert sample products
 INSERT INTO products (product_name, description, price, inventory, image_path, category, popularity) VALUES
