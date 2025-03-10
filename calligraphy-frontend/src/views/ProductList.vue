@@ -113,16 +113,16 @@ export default {
     const fetchProducts = async () => {
       loading.value = true;
       try {
-        let url = 'http://localhost:8080/api/products';
+        let url = '/api/products';
         
         // Apply category filter
         if (categoryFilter.value) {
-          url = `http://localhost:8080/api/products/category/${categoryFilter.value}`;
+          url = `/api/products/category/${categoryFilter.value}`;
         }
         
         // Apply price filter
         if (minPrice.value !== null && maxPrice.value !== null) {
-          url = `http://localhost:8080/api/products/price?min=${minPrice.value}&max=${maxPrice.value}`;
+          url = `/api/products/price?min=${minPrice.value}&max=${maxPrice.value}`;
         }
         
         const response = await axios.get(url);
