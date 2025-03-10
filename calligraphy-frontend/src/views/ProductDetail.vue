@@ -75,7 +75,7 @@ export default {
       error.value = false;
       
       try {
-        const response = await axios.get(`http://localhost:8080/api/products/${productId}`);
+        const response = await axios.get(`/api/products/${productId}`);
         product.value = response.data;
       } catch (err) {
         console.error('Error fetching product details:', err);

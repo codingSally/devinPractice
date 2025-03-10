@@ -213,7 +213,7 @@ export default {
       loading.value = true;
       try {
         const token = store.state.token;
-        const response = await axios.get('http://localhost:8080/api/products', {
+        const response = await axios.get('/api/products', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -243,7 +243,7 @@ export default {
     const deleteProduct = async (productId) => {
       try {
         const token = store.state.token;
-        await axios.delete(`http://localhost:8080/api/products/${productId}`, {
+        await axios.delete(`/api/products/${productId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -263,9 +263,9 @@ export default {
         };
         
         if (isEditing.value) {
-          await axios.put(`http://localhost:8080/api/products/${formState.productId}`, formState, { headers });
+          await axios.put(`/api/products/${formState.productId}`, formState, { headers });
         } else {
-          await axios.post('http://localhost:8080/api/products', formState, { headers });
+          await axios.post('/api/products', formState, { headers });
         }
         
         closeModal();
