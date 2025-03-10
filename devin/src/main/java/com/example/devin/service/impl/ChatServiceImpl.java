@@ -78,74 +78,139 @@ public class ChatServiceImpl implements ChatService {
     }
     
     private String callLlmApi(String prompt) {
-        try {
-            // Prepare headers
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            
-            // Only add Authorization header if API key is provided
-            if (llmApiConfig.getApiKey() != null && !llmApiConfig.getApiKey().isEmpty()) {
-                headers.set("Authorization", "Bearer " + llmApiConfig.getApiKey());
-            }
-            
-            // Prepare request body for OpenAI format
-            OpenAIRequest request = new OpenAIRequest();
-            request.setModel(llmApiConfig.getModel());
-            
-            List<OpenAIRequest.Message> messages = new ArrayList<>();
-            messages.add(new OpenAIRequest.Message("system", "You are a helpful customer service assistant for a calligraphy art store."));
-            messages.add(new OpenAIRequest.Message("user", prompt));
-            request.setMessages(messages);
-            
-            // Create HTTP entity
-            HttpEntity<OpenAIRequest> entity = new HttpEntity<>(request, headers);
-            
-            // Make API call
-            logger.info("Calling LLM API at: " + llmApiConfig.getApiUrl() + " with model: " + llmApiConfig.getModel());
-            ResponseEntity<OpenAIResponse> response = restTemplate.postForEntity(
-                llmApiConfig.getApiUrl(),
-                entity,
-                OpenAIResponse.class
-            );
-            
-            // Process response
-            if (response.getBody() != null && 
-                response.getBody().getChoices() != null && 
-                !response.getBody().getChoices().isEmpty() &&
-                response.getBody().getChoices().get(0).getMessage() != null) {
+        // Try multiple API endpoints if configured ones fail
+        String[] apiEndpoints = getApiEndpointsToTry();
+        String originalApiUrl = llmApiConfig.getApiUrl();
+        String originalModel = llmApiConfig.getModel();
+        
+        for (String endpoint : apiEndpoints) {
+            try {
+                // Parse endpoint string (format: "url|model")
+                String[] parts = endpoint.split("\\|");
+                String apiUrl = parts[0];
+                String model = parts.length > 1 ? parts[1] : originalModel;
                 
-                logger.info("Successfully received response from LLM API");
-                return response.getBody().getChoices().get(0).getMessage().getContent().trim();
+                logger.info("Attempting LLM API call to: " + apiUrl + " with model: " + model);
+                
+                // Prepare headers
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                
+                // Only add Authorization header if API key is provided
+                if (llmApiConfig.getApiKey() != null && !llmApiConfig.getApiKey().isEmpty()) {
+                    headers.set("Authorization", "Bearer " + llmApiConfig.getApiKey());
+                }
+                
+                // Prepare request body for OpenAI format
+                OpenAIRequest request = new OpenAIRequest();
+                request.setModel(model);
+                
+                List<OpenAIRequest.Message> messages = new ArrayList<>();
+                messages.add(new OpenAIRequest.Message("system", "You are a helpful customer service assistant for a calligraphy art store."));
+                messages.add(new OpenAIRequest.Message("user", prompt));
+                request.setMessages(messages);
+                
+                // Create HTTP entity
+                HttpEntity<OpenAIRequest> entity = new HttpEntity<>(request, headers);
+                
+                // Set timeout for this request (3 seconds to fail fast)
+                int originalTimeout = ((SimpleClientHttpRequestFactory)restTemplate.getRequestFactory()).getReadTimeout();
+                ((SimpleClientHttpRequestFactory)restTemplate.getRequestFactory()).setReadTimeout(3000);
+                
+                // Make API call
+                ResponseEntity<OpenAIResponse> response = restTemplate.postForEntity(
+                    apiUrl,
+                    entity,
+                    OpenAIResponse.class
+                );
+                
+                // Reset timeout
+                ((SimpleClientHttpRequestFactory)restTemplate.getRequestFactory()).setReadTimeout(originalTimeout);
+                
+                // Process response
+                if (response.getBody() != null && 
+                    response.getBody().getChoices() != null && 
+                    !response.getBody().getChoices().isEmpty() &&
+                    response.getBody().getChoices().get(0).getMessage() != null) {
+                    
+                    logger.info("Successfully received response from LLM API: " + apiUrl);
+                    return response.getBody().getChoices().get(0).getMessage().getContent().trim();
+                }
+                
+                logger.warning("API response from " + apiUrl + " was empty or invalid, trying next endpoint");
+            } catch (RestClientException e) {
+                logger.log(Level.WARNING, "Error calling LLM API at " + endpoint + ": " + e.getMessage());
+                
+                // Specific error handling for different endpoints
+                if (endpoint.contains("localhost") && e.getMessage() != null && e.getMessage().contains("Connection refused")) {
+                    logger.warning("Connection refused to local Ollama server. Make sure Ollama is running with 'ollama serve'");
+                } else if (endpoint.contains("chatanywhere") && e.getMessage() != null) {
+                    logger.warning("ChatAnywhere API error: " + e.getMessage());
+                }
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Unexpected error when calling LLM API at " + endpoint + ": " + e.getMessage());
             }
-            
-            // Fallback if response parsing fails
-            logger.warning("API response was empty or invalid, using fallback response");
-            return getFallbackResponse(prompt);
-        } catch (RestClientException e) {
-            logger.log(Level.WARNING, "Error calling LLM API: " + e.getMessage(), e);
-            // Check if this is an Ollama-specific error (connection refused often means Ollama is not running)
-            if (e.getMessage() != null && e.getMessage().contains("Connection refused") && 
-                llmApiConfig.getApiUrl().contains("localhost")) {
-                logger.warning("Connection refused to local Ollama server. Make sure Ollama is running with 'ollama serve'");
-            }
-            // Fallback to simulated responses if API call fails
-            return getFallbackResponse(prompt);
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Unexpected error when calling LLM API: " + e.getMessage(), e);
-            return getFallbackResponse(prompt);
         }
+        
+        // All API endpoints failed, use fallback
+        logger.warning("All LLM API endpoints failed, using intelligent fallback response");
+        return getFallbackResponse(prompt);
+    }
+    
+    private String[] getApiEndpointsToTry() {
+        // Try the configured endpoint first, then fallbacks
+        String configuredEndpoint = llmApiConfig.getApiUrl() + "|" + llmApiConfig.getModel();
+        
+        return new String[] {
+            configuredEndpoint,
+            // Try Ollama if not already configured
+            configuredEndpoint.contains("localhost") ? null : "http://localhost:11434/v1/chat/completions|llama2",
+            // Try ChatAnywhere if not already configured
+            configuredEndpoint.contains("chatanywhere") ? null : "https://api.chatanywhere.com.cn/v1/chat/completions|gpt-3.5-turbo"
+        };
     }
     
     private String getFallbackResponse(String prompt) {
-        // Simulate response based on prompt content
-        if (prompt.toLowerCase().contains("price")) {
-            return "The price information is included in the product details above.";
-        } else if (prompt.toLowerCase().contains("inventory") || prompt.toLowerCase().contains("stock")) {
-            return "We have the inventory information listed in the product details.";
-        } else if (prompt.toLowerCase().contains("description") || prompt.toLowerCase().contains("what is")) {
-            return "You can find a detailed description in the product information.";
+        // Extract product information from the prompt
+        String productName = extractFromPrompt(prompt, "Name:", "Price:");
+        String price = extractFromPrompt(prompt, "Price: $", "Category:");
+        String category = extractFromPrompt(prompt, "Category:", "Description:");
+        String description = extractFromPrompt(prompt, "Description:", "Inventory:");
+        String inventory = extractFromPrompt(prompt, "Inventory:", "items in stock");
+        String question = extractFromPrompt(prompt, "Customer Question:", "Provide a helpful");
+        
+        // Generate a more intelligent fallback response based on the question
+        if (question.toLowerCase().contains("price") || question.toLowerCase().contains("cost") || question.toLowerCase().contains("how much")) {
+            return "The " + productName + " costs $" + price + ". It's a great value for a quality calligraphy product in the " + category + " category.";
+        } else if (question.toLowerCase().contains("inventory") || question.toLowerCase().contains("stock") || question.toLowerCase().contains("available")) {
+            return "We currently have " + inventory + " units of the " + productName + " in stock and ready to ship.";
+        } else if (question.toLowerCase().contains("description") || question.toLowerCase().contains("what is") || question.toLowerCase().contains("tell me about")) {
+            return "The " + productName + " is " + description + " It's one of our popular items in the " + category + " category.";
+        } else if (question.toLowerCase().contains("category") || question.toLowerCase().contains("type")) {
+            return "The " + productName + " belongs to our " + category + " category of calligraphy products.";
         } else {
-            return "I'm here to help with any questions about this calligraphy product. Feel free to ask about price, inventory, features, or anything else!";
+            return "Thank you for your interest in the " + productName + ". It costs $" + price + " and we have " + inventory + 
+                   " in stock. It's a " + category + " product. " + description + 
+                   " Please let me know if you have any other questions!";
+        }
+    }
+    
+    private String extractFromPrompt(String prompt, String startMarker, String endMarker) {
+        try {
+            int startIndex = prompt.indexOf(startMarker);
+            if (startIndex == -1) return "";
+            
+            startIndex += startMarker.length();
+            int endIndex = prompt.indexOf(endMarker, startIndex);
+            
+            if (endIndex == -1) {
+                return prompt.substring(startIndex).trim();
+            }
+            
+            return prompt.substring(startIndex, endIndex).trim();
+        } catch (Exception e) {
+            logger.warning("Error extracting information from prompt: " + e.getMessage());
+            return "";
         }
     }
 }

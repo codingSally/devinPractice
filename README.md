@@ -1,8 +1,14 @@
 # Devin Practice - Calligraphy Art Store
 
-## Local LLM Setup with Ollama (Recommended for China)
+## About the Chat Feature
 
-To use the chat feature with a local LLM deployment:
+The application includes a chat feature that uses LLM (Large Language Model) APIs to provide intelligent responses about calligraphy products. The chat feature has been designed with multiple fallback mechanisms to ensure it works reliably even when API connections fail.
+
+## LLM API Configuration Options
+
+### Option 1: Local Ollama Deployment (Recommended for China)
+
+For a completely local solution that works without internet access:
 
 1. Install Ollama:
    ```bash
@@ -21,9 +27,9 @@ To use the chat feature with a local LLM deployment:
    
    You can also try other models like:
    ```bash
-   ollama pull qwen:0.5b
+   ollama pull qwen:0.5b  # Chinese model
    # or
-   ollama pull phi
+   ollama pull phi  # Smaller model
    ```
 
 4. Update application.properties (if needed):
@@ -33,26 +39,42 @@ To use the chat feature with a local LLM deployment:
    llm.api.model=llama2  # or the model you pulled
    ```
 
-5. Start the application and test the chat feature
+### Option 2: ChatAnywhere API
 
-## Troubleshooting
-
-If you encounter issues with Ollama:
-- Check if Ollama is running with `ps aux | grep ollama`
-- Verify the model is downloaded with `ollama list`
-- Check Ollama logs for errors
-- The application will fall back to simulated responses if Ollama is unavailable
-
-## Alternative API Options
-
-If you prefer not to run a local LLM, you can use alternative API endpoints by updating the application.properties file:
+If you prefer not to run a local LLM:
 
 ```properties
-# ChatAnywhere API (may require VPN access)
 llm.api.url=https://api.chatanywhere.com.cn/v1/chat/completions
 llm.api.key=your_api_key_here
 llm.api.model=gpt-3.5-turbo
 ```
+
+## Robust Fallback Mechanism
+
+The application now includes a robust fallback system:
+
+1. **Multiple API Endpoints**: The application will automatically try multiple API endpoints if the configured one fails
+2. **Intelligent Fallback Responses**: If all API endpoints fail, the application generates intelligent responses based on product information
+3. **Fast Failover**: The application uses short timeouts to quickly switch between endpoints
+
+## Troubleshooting
+
+If you encounter issues with the chat feature:
+
+### For Ollama:
+- Check if Ollama is running with `ps aux | grep ollama`
+- Verify the model is downloaded with `ollama list`
+- Check Ollama logs for errors
+- Try running the test script: `./test-ollama.sh`
+
+### For ChatAnywhere:
+- Check your network connection
+- Verify your API key if you're using one
+- Try a different API endpoint
+
+### General Troubleshooting:
+- Check the application logs for specific error messages
+- The application will automatically use intelligent fallback responses if all API endpoints fail
 
 ## Running the Application
 
