@@ -31,9 +31,9 @@
             </div>
             
             <div class="actions">
-              <a-button type="primary" size="large" @click="showChatModal">
-                Add to Cart
-              </a-button>
+              <button class="primary-button" @click="showChatModal" type="button">
+                Add to Chat
+              </button>
             </div>
           </div>
         </a-col>
@@ -53,47 +53,43 @@
       </template>
     </a-result>
     
-    <!-- Chat Modal -->
-    <a-modal
-      title="Customer Service"
-      :visible="chatModalVisible"
-      @cancel="closeChatModal"
-      :footer="null"
-      width="500px"
-    >
-      <div class="chat-container">
-        <a-list
-          class="chat-messages"
-          :data-source="chatMessages"
-          :split="false"
-        >
-          <template #renderItem="{ item }">
-            <a-list-item>
-              <div :class="['message', item.sender === 'user' ? 'user-message' : 'bot-message']">
-                <a-avatar :style="{ backgroundColor: item.sender === 'user' ? '#1890ff' : '#52c41a' }">
-                  {{ item.sender === 'user' ? 'U' : 'CS' }}
-                </a-avatar>
-                <div class="message-content">{{ item.content }}</div>
+    <!-- Custom Chat Modal -->
+    <div v-show="chatModalVisible" class="custom-modal-overlay">
+      <div class="custom-modal">
+        <div class="custom-modal-header">
+          <h3>Customer Service</h3>
+          <button class="close-button" @click="closeChatModal">×</button>
+        </div>
+        <div class="chat-container">
+          <div class="chat-messages">
+            <div v-for="(item, index) in chatMessages" :key="index" 
+                 :class="['message', item.sender === 'user' ? 'user-message' : 'bot-message']">
+              <div class="avatar" :style="{ backgroundColor: item.sender === 'user' ? '#1890ff' : '#52c41a' }">
+                {{ item.sender === 'user' ? 'U' : 'CS' }}
               </div>
-            </a-list-item>
-          </template>
-        </a-list>
-        
-        <div class="chat-input">
-          <a-input
-            v-model:value="userMessage"
-            placeholder="Ask about this product..."
-            @pressEnter="sendMessage"
-          />
-          <a-button type="primary" @click="sendMessage" :loading="sendingMessage">Send</a-button>
+              <div class="message-content">{{ item.content }}</div>
+            </div>
+          </div>
+          
+          <div class="chat-input">
+            <input
+              v-model="userMessage"
+              placeholder="Ask about this product..."
+              @keyup.enter="sendMessage"
+              class="chat-input-field"
+            />
+            <button class="send-button" @click="sendMessage" :disabled="sendingMessage">
+              {{ sendingMessage ? 'Sending...' : 'Send' }}
+            </button>
+          </div>
         </div>
       </div>
-    </a-modal>
+    </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 
@@ -131,7 +127,8 @@ export default {
     };
     
     const showChatModal = () => {
-      chatModalVisible.value = true;
+      console.log('showChatModal called');
+      
       // Add initial welcome message
       if (chatMessages.value.length === 0) {
         chatMessages.value.push({
@@ -139,10 +136,34 @@ export default {
           content: `Welcome! How can I help you with the ${product.value.productName}?`
         });
       }
+      
+      // Set modal visible
+      chatModalVisible.value = true;
+      console.log('chatModalVisible set to:', chatModalVisible.value);
+      
+      // Force a re-render and check
+      nextTick(() => {
+        console.log('After nextTick, chatModalVisible:', chatModalVisible.value);
+        const modalElement = document.querySelector('.custom-modal-overlay');
+        console.log('Modal element exists:', !!modalElement);
+        
+        if (modalElement) {
+          modalElement.style.display = 'flex';
+        }
+      });
     };
 
     const closeChatModal = () => {
+      console.log('Closing chat modal');
       chatModalVisible.value = false;
+      
+      // Force update DOM
+      nextTick(() => {
+        const modalElement = document.querySelector('.custom-modal-overlay');
+        if (modalElement) {
+          modalElement.style.display = 'none';
+        }
+      });
     };
 
     const sendMessage = async () => {
@@ -160,88 +181,24 @@ export default {
       sendingMessage.value = true;
       
       try {
-        // Call LLM API with product context
-        const response = await callLlmApi(message, product.value);
+        // Call backend chat API
+        const response = await axios.post(`/api/chat/product/${route.params.id}`, {
+          message: message
+        });
         
         // Add bot response to chat
         chatMessages.value.push({
           sender: 'bot',
-          content: response
+          content: response.data.message
         });
       } catch (error) {
-        console.error('Error calling LLM API:', error);
+        console.error('Error calling chat API:', error);
         chatMessages.value.push({
           sender: 'bot',
           content: 'Sorry, I encountered an error. Please try again later.'
         });
       } finally {
         sendingMessage.value = false;
-      }
-    };
-    
-    const callLlmApi = async (message, productInfo) => {
-      // Using Hugging Face Inference API as an example
-      // You would need to replace this with your preferred LLM API
-      try {
-        const prompt = `
-          You are a helpful customer service assistant for a calligraphy art store.
-          
-          Product Information:
-          - Name: ${productInfo.productName}
-          - Price: $${productInfo.price}
-          - Category: ${productInfo.category}
-          - Description: ${productInfo.description}
-          - Inventory: ${productInfo.inventory} items in stock
-          
-          Customer Question: ${message}
-          
-          Provide a helpful, concise response about this product. If asked about price, inventory, or features, use the product information provided.
-        `;
-        
-        // For demo purposes, simulate API call with a timeout
-        // In production, replace with actual API call
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            // Generate a simple response based on the question
-            let response = "I'm sorry, I don't have specific information about that.";
-            
-            if (message.toLowerCase().includes('price')) {
-              response = `The price of ${productInfo.productName} is $${productInfo.price}.`;
-            } else if (message.toLowerCase().includes('inventory') || message.toLowerCase().includes('stock')) {
-              response = `We currently have ${productInfo.inventory} ${productInfo.productName} items in stock.`;
-            } else if (message.toLowerCase().includes('description') || message.toLowerCase().includes('what is') || message.toLowerCase().includes('tell me about')) {
-              response = `${productInfo.productName} is ${productInfo.description}`;
-            } else if (message.toLowerCase().includes('category')) {
-              response = `${productInfo.productName} belongs to the ${productInfo.category} category.`;
-            } else if (message.toLowerCase().includes('hello') || message.toLowerCase().includes('hi')) {
-              response = `Hello! How can I help you with the ${productInfo.productName} today?`;
-            }
-            
-            resolve(response);
-          }, 1000);
-        });
-        
-        /* Uncomment and replace with your actual API key for production use
-        const response = await axios.post('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2', {
-          inputs: prompt,
-          parameters: {
-            max_new_tokens: 250,
-            temperature: 0.7,
-            top_p: 0.95,
-            do_sample: true
-          }
-        }, {
-          headers: {
-            'Authorization': 'Bearer YOUR_HUGGINGFACE_API_KEY',
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        return response.data[0].generated_text || "I'm sorry, I couldn't generate a response.";
-        */
-      } catch (error) {
-        console.error('Error calling LLM API:', error);
-        return "I'm sorry, I'm having trouble connecting to my knowledge base right now.";
       }
     };
     
@@ -302,6 +259,22 @@ export default {
   margin-top: 32px;
 }
 
+.primary-button {
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 2px;
+  padding: 8px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  height: 40px;
+  line-height: 24px;
+}
+
+.primary-button:hover {
+  background-color: #40a9ff;
+}
+
 .chat-container {
   display: flex;
   flex-direction: column;
@@ -342,5 +315,107 @@ export default {
 .chat-input {
   display: flex;
   gap: 8px;
+}
+
+/* Custom Modal Styles */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.custom-modal {
+  width: 500px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.custom-modal-header h3 {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: 500;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.close-button:hover {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  height: 300px;
+}
+
+.avatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+}
+
+.chat-input-field {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  outline: none;
+}
+
+.chat-input-field:focus {
+  border-color: #40a9ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.send-button {
+  padding: 8px 16px;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.send-button:hover {
+  background-color: #40a9ff;
+}
+
+.send-button:disabled {
+  background-color: #d9d9d9;
+  cursor: not-allowed;
 }
 </style>

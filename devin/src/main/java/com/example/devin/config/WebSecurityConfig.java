@@ -81,6 +81,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/products/price/**").permitAll()
                 .antMatchers("/api/products/popular/**").permitAll()
                 .antMatchers("/api/products/{id}").permitAll() // Allow product detail access
+                .antMatchers("/api/chat/product/**").permitAll() // Allow chat API access
                 .antMatchers("/api/products/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
