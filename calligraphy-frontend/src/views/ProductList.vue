@@ -59,8 +59,8 @@
             <template #cover>
               <img
                 alt="product image"
-                :src="product.imagePath || 'https://via.placeholder.com/300x200?text=Calligraphy+Product'"
-                style="height: 200px; object-fit: cover;"
+                :src="getCartoonImage(product.imagePath)"
+                style="height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;"
               />
             </template>
             <a-card-meta :title="product.productName">
@@ -94,6 +94,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { getCartoonImage } from '../utils/imageUtils';
 
 export default {
   name: 'ProductList',
@@ -180,7 +181,8 @@ export default {
       resetFilters,
       handlePageChange,
       truncateDescription,
-      viewProductDetails
+      viewProductDetails,
+      getCartoonImage
     };
   }
 };

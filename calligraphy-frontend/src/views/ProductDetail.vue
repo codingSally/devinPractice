@@ -9,7 +9,7 @@
       <a-row :gutter="24">
         <a-col :span="12">
           <img
-            :src="product.imagePath || 'https://via.placeholder.com/600x400?text=Calligraphy+Product'"
+            :src="getCartoonImage(product.imagePath)"
             alt="Product Image"
             class="product-image"
           />
@@ -92,6 +92,7 @@
 import { ref, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
+import { getCartoonImage } from '../utils/imageUtils';
 
 export default {
   name: 'ProductDetail',
@@ -217,7 +218,8 @@ export default {
       sendingMessage,
       showChatModal,
       closeChatModal,
-      sendMessage
+      sendMessage,
+      getCartoonImage
     };
   }
 };

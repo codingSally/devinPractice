@@ -18,9 +18,9 @@
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'image'">
               <img
-                :src="record.imagePath || 'https://via.placeholder.com/50x50?text=No+Image'"
+                :src="getCartoonImage(record.imagePath)"
                 alt="Product"
-                style="width: 50px; height: 50px; object-fit: cover;"
+                style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
               />
             </template>
             
@@ -44,6 +44,12 @@
                   </a-button>
                 </a-popconfirm>
               </a-space>
+            </template>
+            
+            <template v-if="column.key === 'copy'">
+              <a-button type="link" size="small" @click="copyProductDetails(record)">
+                Copy
+              </a-button>
             </template>
           </template>
         </a-table>
@@ -137,6 +143,8 @@ import { ref, reactive, onMounted, computed } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { getCartoonImage } from '../utils/imageUtils';
+import { message } from 'ant-design-vue';
 
 export default {
   name: 'ProductManagement',
@@ -206,6 +214,11 @@ export default {
         title: 'Actions',
         key: 'action',
         width: 150
+      },
+      {
+        title: 'Copy',
+        key: 'copy',
+        width: 80
       }
     ];
     
@@ -282,6 +295,18 @@ export default {
       resetForm();
     };
     
+    const copyProductDetails = (product) => {
+      const details = `Product Name: ${product.productName}\nCategory: ${product.category}\nPrice: $${product.price}\nInventory: ${product.inventory}`;
+      navigator.clipboard.writeText(details)
+        .then(() => {
+          message.success('Product details copied to clipboard!');
+        })
+        .catch(err => {
+          console.error('Failed to copy: ', err);
+          message.error('Failed to copy product details');
+        });
+    };
+    
     const resetForm = () => {
       formState.productId = null;
       formState.productName = '';
@@ -316,7 +341,9 @@ export default {
       editProduct,
       deleteProduct,
       submitForm,
-      closeModal
+      closeModal,
+      copyProductDetails,
+      getCartoonImage
     };
   }
 };
