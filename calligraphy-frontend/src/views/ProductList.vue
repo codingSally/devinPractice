@@ -1,6 +1,6 @@
 <template>
   <div class="product-list">
-    <h1>Calligraphy Products</h1>
+    <h1 style="background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">Calligraphy Products</h1>
     
     <div class="filters">
       <a-row :gutter="16">
@@ -42,7 +42,7 @@
         </a-col>
         
         <a-col :span="6">
-          <a-button type="primary" @click="applyFilters">Apply Filters</a-button>
+          <a-button type="primary" @click="applyFilters" style="background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%); border: none; box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3); border-radius: 18px;">Apply Filters</a-button>
           <a-button style="margin-left: 8px" @click="resetFilters">Reset</a-button>
         </a-col>
       </a-row>
@@ -68,8 +68,8 @@
                 <div>
                   <p>{{ truncateDescription(product.description) }}</p>
                   <p class="price">${{ product.price }}</p>
-                  <a-button type="primary" @click="viewProductDetails(product.productId)">
-                    View Details
+               <a-button type="primary" class="view-details-btn" @click="viewProductDetails(product.productId)">
+                    <span style="font-weight: 500;">View Details</span>
                   </a-button>
                 </div>
               </template>
@@ -191,28 +191,102 @@ export default {
 <style scoped>
 .product-list {
   padding: 20px 0;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .filters {
   margin-bottom: 24px;
-  padding: 16px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #1890ff;
+  animation: slideUp 0.5s ease-out;
 }
 
 .price {
   font-weight: bold;
   color: #1890ff;
-  margin: 8px 0;
+  margin: 12px 0;
+  font-size: 20px;
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1), transparent);
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .pagination {
-  margin-top: 24px;
+  margin-top: 32px;
   text-align: center;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease-out;
 }
 
 .empty-state {
   margin: 48px 0;
   text-align: center;
+  padding: 40px;
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+}
+
+/* Card styling */
+:deep(.ant-card) {
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: none;
+  animation: slideUp 0.5s ease-out;
+  transform: translateY(0);
+}
+
+:deep(.ant-card:hover) {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+:deep(.ant-card-meta-title) {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: #333333;
+  font-weight: 600;
+}
+
+:deep(.ant-card-meta-description) {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.view-details-btn {
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%) !important;
+  border: none !important;
+  height: 36px;
+  border-radius: 18px !important;
+  padding: 0 20px !important;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3) !important;
+  transition: all 0.3s !important;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.view-details-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.5) !important;
+  opacity: 0.9;
+}
+
+/* Gradient text styling */
+.gradient-text {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  display: inline-block;
 }
 </style>

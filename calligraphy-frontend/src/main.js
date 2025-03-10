@@ -3,6 +3,7 @@ import { createStore } from 'vuex';
 import { createRouter, createWebHistory } from 'vue-router';
 import Antd from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
+import './assets/global.css';
 import App from './App.vue';
 import Login from './views/Login.vue';
 import ProductList from './views/ProductList.vue';
