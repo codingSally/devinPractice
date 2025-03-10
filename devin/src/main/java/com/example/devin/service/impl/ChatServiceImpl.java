@@ -82,7 +82,11 @@ public class ChatServiceImpl implements ChatService {
             // Prepare headers
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", "Bearer " + llmApiConfig.getApiKey());
+            
+            // Only add Authorization header if API key is provided
+            if (llmApiConfig.getApiKey() != null && !llmApiConfig.getApiKey().isEmpty()) {
+                headers.set("Authorization", "Bearer " + llmApiConfig.getApiKey());
+            }
             
             // Prepare request body for OpenAI format
             OpenAIRequest request = new OpenAIRequest();
@@ -97,6 +101,7 @@ public class ChatServiceImpl implements ChatService {
             HttpEntity<OpenAIRequest> entity = new HttpEntity<>(request, headers);
             
             // Make API call
+            logger.info("Calling LLM API at: " + llmApiConfig.getApiUrl() + " with model: " + llmApiConfig.getModel());
             ResponseEntity<OpenAIResponse> response = restTemplate.postForEntity(
                 llmApiConfig.getApiUrl(),
                 entity,
@@ -118,6 +123,11 @@ public class ChatServiceImpl implements ChatService {
             return getFallbackResponse(prompt);
         } catch (RestClientException e) {
             logger.log(Level.WARNING, "Error calling LLM API: " + e.getMessage(), e);
+            // Check if this is an Ollama-specific error (connection refused often means Ollama is not running)
+            if (e.getMessage() != null && e.getMessage().contains("Connection refused") && 
+                llmApiConfig.getApiUrl().contains("localhost")) {
+                logger.warning("Connection refused to local Ollama server. Make sure Ollama is running with 'ollama serve'");
+            }
             // Fallback to simulated responses if API call fails
             return getFallbackResponse(prompt);
         } catch (Exception e) {
