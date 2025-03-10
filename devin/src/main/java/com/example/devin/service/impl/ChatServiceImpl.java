@@ -2,35 +2,24 @@ package com.example.devin.service.impl;
 
 import com.example.devin.model.ChatRequest;
 import com.example.devin.model.ChatResponse;
-import com.example.devin.model.LlmRequest;
 import com.example.devin.model.Product;
 import com.example.devin.service.ChatService;
 import com.example.devin.service.ProductService;
+import com.theokanning.openai.completion.CompletionRequest;
+import com.theokanning.openai.completion.CompletionResult;
+import com.theokanning.openai.service.OpenAiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class ChatServiceImpl implements ChatService {
 
     @Autowired
-    private RestTemplate restTemplate;
+    private OpenAiService openAiService;
     
     @Autowired
     private ProductService productService;
-    
-    @Value("${llm.api.url}")
-    private String llmApiUrl;
-    
-    @Value("${llm.api.key}")
-    private String llmApiKey;
     
     @Value("${llm.api.model}")
     private String llmApiModel;
@@ -78,47 +67,40 @@ public class ChatServiceImpl implements ChatService {
     
     private String callLlmApi(String prompt) {
         try {
-            // For demo purposes, simulate API call
-            // In production, uncomment the API call code
+            // Create completion request
+            CompletionRequest completionRequest = CompletionRequest.builder()
+                .model(llmApiModel)
+                .prompt(prompt)
+                .maxTokens(250)
+                .temperature(0.7)
+                .topP(0.95)
+                .build();
             
-            // Simulate response based on prompt content
-            if (prompt.toLowerCase().contains("price")) {
-                return "The price information is included in the product details above.";
-            } else if (prompt.toLowerCase().contains("inventory") || prompt.toLowerCase().contains("stock")) {
-                return "We have the inventory information listed in the product details.";
-            } else if (prompt.toLowerCase().contains("description") || prompt.toLowerCase().contains("what is")) {
-                return "You can find a detailed description in the product information.";
-            } else {
-                return "I'm here to help with any questions about this calligraphy product. Feel free to ask about price, inventory, features, or anything else!";
-            }
+            // Call OpenAI API
+            CompletionResult completionResult = openAiService.createCompletion(completionRequest);
             
-            /* Uncomment for actual API integration
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", "Bearer " + llmApiKey);
-            
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("model", llmApiModel);
-            requestBody.put("prompt", prompt);
-            requestBody.put("max_tokens", 250);
-            requestBody.put("temperature", 0.7);
-            
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-            
-            Map<String, Object> response = restTemplate.postForObject(llmApiUrl, entity, Map.class);
-            
-            // Extract response text from LLM API response
-            if (response != null && response.containsKey("choices")) {
-                List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
-                if (!choices.isEmpty()) {
-                    return (String) choices.get(0).get("text");
-                }
+            // Extract response text
+            if (completionResult != null && !completionResult.getChoices().isEmpty()) {
+                return completionResult.getChoices().get(0).getText().trim();
             }
             
             return "I'm sorry, I couldn't generate a response.";
-            */
         } catch (Exception e) {
-            return "I'm sorry, I'm having trouble connecting to my knowledge base right now.";
+            // Fallback to simulated responses if API call fails
+            return getFallbackResponse(prompt);
+        }
+    }
+    
+    private String getFallbackResponse(String prompt) {
+        // Simulate response based on prompt content
+        if (prompt.toLowerCase().contains("price")) {
+            return "The price information is included in the product details above.";
+        } else if (prompt.toLowerCase().contains("inventory") || prompt.toLowerCase().contains("stock")) {
+            return "We have the inventory information listed in the product details.";
+        } else if (prompt.toLowerCase().contains("description") || prompt.toLowerCase().contains("what is")) {
+            return "You can find a detailed description in the product information.";
+        } else {
+            return "I'm here to help with any questions about this calligraphy product. Feel free to ask about price, inventory, features, or anything else!";
         }
     }
 }
