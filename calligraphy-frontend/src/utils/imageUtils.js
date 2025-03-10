@@ -5,30 +5,23 @@
  * @returns {string} - The cartoon animal image URL
  */
 export function getCartoonImage(imageUrl) {
-  // Since we can't use external cartoon images due to CORS or access issues,
-  // we're using colorful placeholder images with cartoon animal text
-  // In a production environment, we would use actual cartoon animal images hosted on a CDN
-  
-  // Create a pastel background color based on the image path to simulate different cartoon animals
-  let bgColor, animal;
+  // Using Robohash.org which provides reliable cartoon animal images (set=set4)
+  // Each animal is uniquely generated based on the text provided
+  let animal;
   
   if (imageUrl && imageUrl.includes('brush')) {
-    bgColor = 'b3e0ff'; // Light blue
-    animal = 'Cartoon Fox';
+    animal = 'fox'; // Fox for brush category
   } else if (imageUrl && imageUrl.includes('ink')) {
-    bgColor = 'ffb3b3'; // Light red
-    animal = 'Cartoon Cat';
+    animal = 'cat'; // Cat for ink category
   } else if (imageUrl && imageUrl.includes('paper')) {
-    bgColor = 'b3ffb3'; // Light green
-    animal = 'Cartoon Panda';
+    animal = 'panda'; // Panda for paper category
   } else if (imageUrl && imageUrl.includes('calligraphy')) {
-    bgColor = 'e6b3ff'; // Light purple
-    animal = 'Cartoon Rabbit';
+    animal = 'rabbit'; // Rabbit for calligraphy works category
   } else {
-    bgColor = 'ffffb3'; // Light yellow
-    animal = 'Cartoon Bear';
+    animal = 'bear'; // Bear as default
   }
   
-  // Use placeholder.com which is reliable and supports custom colors
-  return `https://via.placeholder.com/200x200/${bgColor}/333333.png?text=${animal.replace(' ', '+')}`;
+  // Robohash.org with set=set4 provides cute cartoon animal images
+  // The size parameter ensures consistent image dimensions
+  return `https://robohash.org/${animal}?set=set4&size=200x200`;
 }
