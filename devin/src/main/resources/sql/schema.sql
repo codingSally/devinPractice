@@ -31,4 +31,8 @@ INSERT INTO products (product_name, description, price, inventory, image_path, c
 ('Calligraphy Brush Set', 'High-quality brush set for beginners', 29.99, 50, '/images/brush-set.jpg', 'brushes', 10),
 ('Premium Ink', 'Traditional black ink for calligraphy', 15.99, 100, '/images/ink.jpg', 'ink', 8),
 ('Rice Paper', 'Traditional rice paper for calligraphy practice', 12.99, 200, '/images/rice-paper.jpg', 'paper', 7),
-('Calligraphy Art - Harmony', 'Beautiful calligraphy artwork depicting harmony', 199.99, 5, '/images/harmony.jpg', 'calligraphy works', 5);
+('Calligraphy Art - Harmony', 'Beautiful calligraphy artwork depicting harmony', 199.99, 5, '/images/harmony.jpg', 'calligraphy works', 5),
+('Professional Brush Collection', 'Premium brushes for advanced calligraphers', 49.99, 30, '/images/professional-brushes.jpg', 'brushes', 9),
+('Colored Ink Set', 'Set of 5 vibrant colors for creative calligraphy', 24.99, 80, '/images/colored-ink.jpg', 'ink', 6),
+('Bamboo Paper Scroll', 'Traditional bamboo paper scroll for authentic calligraphy', 19.99, 60, '/images/bamboo-paper.jpg', 'paper', 7),
+('Calligraphy Art - Serenity', 'Elegant calligraphy artwork representing serenity', 249.99, 3, '/images/calligraphy-serenity.jpg', 'calligraphy works', 8);
