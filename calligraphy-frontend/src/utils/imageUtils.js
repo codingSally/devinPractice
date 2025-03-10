@@ -1,12 +1,12 @@
 /**
  * Converts a regular image URL to a cartoon-style image URL
- * Uses cute cartoon animal images as requested by the user
+ * Uses cute cartoon animal images stored locally in the public directory
  * @param {string} imageUrl - The original image URL
- * @returns {string} - The cartoon animal image URL
+ * @returns {string} - The local cartoon animal image URL
  */
 export function getCartoonImage(imageUrl) {
-  // Using Robohash.org which provides reliable cartoon animal images (set=set4)
-  // Each animal is uniquely generated based on the text provided
+  // Using local images stored in the public directory
+  // These are cute cartoon animal images that match the style requested by the user
   let animal;
   
   if (imageUrl && imageUrl.includes('brush')) {
@@ -21,7 +21,6 @@ export function getCartoonImage(imageUrl) {
     animal = 'bear'; // Bear as default
   }
   
-  // Robohash.org with set=set4 provides cute cartoon animal images
-  // The size parameter ensures consistent image dimensions
-  return `https://robohash.org/${animal}?set=set4&size=200x200`;
+  // Return the path to the local image in the public directory
+  return `/images/${animal}.jpg`;
 }
