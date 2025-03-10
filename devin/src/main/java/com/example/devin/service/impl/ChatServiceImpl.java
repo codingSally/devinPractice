@@ -16,7 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -83,26 +84,23 @@ public class ChatServiceImpl implements ChatService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Authorization", "Bearer " + huggingFaceConfig.getApiKey());
             
-            // Prepare request body
-            HuggingFaceRequest.Parameters parameters = new HuggingFaceRequest.Parameters();
-            HuggingFaceRequest requestBody = new HuggingFaceRequest(prompt, parameters);
+            // Prepare request body - simplify to just include inputs
+            Map<String, Object> requestMap = new HashMap<>();
+            requestMap.put("inputs", prompt);
             
             // Create HTTP entity
-            HttpEntity<HuggingFaceRequest> entity = new HttpEntity<>(requestBody, headers);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestMap, headers);
             
             // Make API call
-            ResponseEntity<HuggingFaceResponse[]> response = restTemplate.postForEntity(
+            ResponseEntity<HuggingFaceResponse> response = restTemplate.postForEntity(
                 huggingFaceConfig.getApiUrl(),
                 entity,
-                HuggingFaceResponse[].class
+                HuggingFaceResponse.class
             );
             
             // Process response
-            if (response.getBody() != null && response.getBody().length > 0) {
-                HuggingFaceResponse hfResponse = response.getBody()[0];
-                if (hfResponse != null && hfResponse.getGenerated_text() != null && !hfResponse.getGenerated_text().isEmpty()) {
-                    return hfResponse.getGenerated_text().get(0).getText().trim();
-                }
+            if (response.getBody() != null && response.getBody().getGenerated_text() != null) {
+                return response.getBody().getGenerated_text().trim();
             }
             
             // Fallback if response parsing fails

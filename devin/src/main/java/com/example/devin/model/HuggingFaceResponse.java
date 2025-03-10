@@ -9,8 +9,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HuggingFaceResponse {
-    private List<GeneratedText> generated_text;
+    private String generated_text;
     
+    // Keep the inner class for backward compatibility
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
