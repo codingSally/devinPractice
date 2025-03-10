@@ -115,22 +115,8 @@
             <scope>test</scope>
         </dependency>
         
-        <!-- OpenAI Java Client -->
-        <dependency>
-            <groupId>com.theokanning.openai-gpt3-java</groupId>
-            <artifactId>service</artifactId>
-            <version>0.18.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.theokanning.openai-gpt3-java</groupId>
-            <artifactId>client</artifactId>
-            <version>0.18.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.theokanning.openai-gpt3-java</groupId>
-            <artifactId>api</artifactId>
-            <version>0.18.2</version>
-        </dependency>
+        <!-- Removed OpenAI Java Client dependencies -->
+        <!-- Spring Boot already includes RestTemplate for HTTP requests -->
 	</dependencies>
 
     <build>
