@@ -78,7 +78,14 @@ public class ChatServiceImpl implements ChatService {
     }
     
     private String callLlmApi(String prompt) {
+        // Check if we should use the API or go directly to the fallback
+        if (shouldUseLocalResponse()) {
+            logger.info("Using local response generation instead of API call");
+            return getSmartResponse(prompt);
+        }
+        
         try {
+            logger.info("Attempting to call Hugging Face API");
             // Prepare headers
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -100,28 +107,120 @@ public class ChatServiceImpl implements ChatService {
             
             // Process response
             if (response.getBody() != null && response.getBody().getGenerated_text() != null) {
+                logger.info("Successfully received response from Hugging Face API");
                 return response.getBody().getGenerated_text().trim();
             }
             
             // Fallback if response parsing fails
-            return getFallbackResponse(prompt);
+            logger.warning("API response was empty or invalid, using local response generation");
+            return getSmartResponse(prompt);
         } catch (RestClientException e) {
-            logger.log(Level.WARNING, "Error calling Hugging Face API", e);
+            logger.log(Level.WARNING, "Error calling Hugging Face API: " + e.getMessage(), e);
             // Fallback to simulated responses if API call fails
-            return getFallbackResponse(prompt);
+            return getSmartResponse(prompt);
         }
     }
     
-    private String getFallbackResponse(String prompt) {
-        // Simulate response based on prompt content
-        if (prompt.toLowerCase().contains("price")) {
-            return "The price information is included in the product details above.";
-        } else if (prompt.toLowerCase().contains("inventory") || prompt.toLowerCase().contains("stock")) {
-            return "We have the inventory information listed in the product details.";
-        } else if (prompt.toLowerCase().contains("description") || prompt.toLowerCase().contains("what is")) {
-            return "You can find a detailed description in the product information.";
-        } else {
-            return "I'm here to help with any questions about this calligraphy product. Feel free to ask about price, inventory, features, or anything else!";
+    private boolean shouldUseLocalResponse() {
+        // Check if API key is the default one (which won't work)
+        if ("hf_demo".equals(huggingFaceConfig.getApiKey())) {
+            return true;
         }
+        
+        // Add other conditions here if needed
+        return false;
+    }
+    
+    private String getSmartResponse(String prompt) {
+        // Extract product information from the prompt
+        Map<String, String> productInfo = extractProductInfo(prompt);
+        String userQuestion = extractUserQuestion(prompt);
+        
+        // Generate a more intelligent response based on the question and product info
+        if (userQuestion.toLowerCase().contains("price")) {
+            return "This " + productInfo.getOrDefault("name", "calligraphy product") + 
+                   " is priced at " + productInfo.getOrDefault("price", "the price shown above") + 
+                   ". It's a great value for a product in the " + 
+                   productInfo.getOrDefault("category", "calligraphy") + " category.";
+        } else if (userQuestion.toLowerCase().contains("inventory") || userQuestion.toLowerCase().contains("stock") || 
+                  userQuestion.toLowerCase().contains("available")) {
+            return "We currently have " + productInfo.getOrDefault("inventory", "the number shown above") + 
+                   " units of this item in stock. If you're interested, I recommend placing your order soon.";
+        } else if (userQuestion.toLowerCase().contains("description") || userQuestion.toLowerCase().contains("what is") || 
+                  userQuestion.toLowerCase().contains("tell me about")) {
+            return "This " + productInfo.getOrDefault("name", "product") + " is " + 
+                   productInfo.getOrDefault("description", "a high-quality calligraphy item") + 
+                   ". It's perfect for calligraphy enthusiasts looking for quality materials.";
+        } else if (userQuestion.toLowerCase().contains("shipping") || userQuestion.toLowerCase().contains("delivery")) {
+            return "We offer standard shipping that takes 3-5 business days. Express shipping is also available for an additional fee.";
+        } else if (userQuestion.toLowerCase().contains("return") || userQuestion.toLowerCase().contains("refund")) {
+            return "We have a 30-day return policy for all our products. If you're not satisfied, you can return it for a full refund.";
+        } else {
+            return "Thank you for your interest in our " + productInfo.getOrDefault("name", "calligraphy product") + 
+                   ". It's one of our popular items in the " + productInfo.getOrDefault("category", "calligraphy") + 
+                   " category. If you have any specific questions about its features, price, or availability, feel free to ask!";
+        }
+    }
+    
+    private Map<String, String> extractProductInfo(String prompt) {
+        Map<String, String> info = new HashMap<>();
+        
+        // Extract product name
+        extractValue(prompt, "Name:", info, "name");
+        
+        // Extract price
+        extractValue(prompt, "Price:", info, "price");
+        
+        // Extract category
+        extractValue(prompt, "Category:", info, "category");
+        
+        // Extract description
+        extractValue(prompt, "Description:", info, "description");
+        
+        // Extract inventory
+        String inventoryStr = extractInventoryValue(prompt, "Inventory:");
+        if (inventoryStr != null) {
+            info.put("inventory", inventoryStr);
+        }
+        
+        return info;
+    }
+    
+    private void extractValue(String prompt, String prefix, Map<String, String> info, String key) {
+        int startIndex = prompt.indexOf(prefix);
+        if (startIndex >= 0) {
+            startIndex += prefix.length();
+            int endIndex = prompt.indexOf("\n", startIndex);
+            if (endIndex > startIndex) {
+                String value = prompt.substring(startIndex, endIndex).trim();
+                info.put(key, value);
+            }
+        }
+    }
+    
+    private String extractInventoryValue(String prompt, String prefix) {
+        int startIndex = prompt.indexOf(prefix);
+        if (startIndex >= 0) {
+            startIndex += prefix.length();
+            int endIndex = prompt.indexOf("items in stock", startIndex);
+            if (endIndex > startIndex) {
+                return prompt.substring(startIndex, endIndex).trim();
+            }
+        }
+        return null;
+    }
+    
+    private String extractUserQuestion(String prompt) {
+        int startIndex = prompt.indexOf("Customer Question:");
+        if (startIndex >= 0) {
+            startIndex += "Customer Question:".length();
+            return prompt.substring(startIndex).trim();
+        }
+        return prompt;
+    }
+    
+    // Keep the old method for backward compatibility
+    private String getFallbackResponse(String prompt) {
+        return getSmartResponse(prompt);
     }
 }
