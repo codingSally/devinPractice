@@ -1,28 +1,38 @@
 package com.example.devin.service.impl;
 
+import com.example.devin.config.HuggingFaceConfig;
 import com.example.devin.model.ChatRequest;
 import com.example.devin.model.ChatResponse;
+import com.example.devin.model.HuggingFaceRequest;
+import com.example.devin.model.HuggingFaceResponse;
 import com.example.devin.model.Product;
 import com.example.devin.service.ChatService;
 import com.example.devin.service.ProductService;
-import com.theokanning.openai.completion.CompletionRequest;
-import com.theokanning.openai.completion.CompletionResult;
-import com.theokanning.openai.service.OpenAiService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Service
 public class ChatServiceImpl implements ChatService {
 
+    private static final Logger logger = Logger.getLogger(ChatServiceImpl.class.getName());
+    
     @Autowired
-    private OpenAiService openAiService;
+    private RestTemplate restTemplate;
     
     @Autowired
     private ProductService productService;
     
-    @Value("${llm.api.model}")
-    private String llmApiModel;
+    @Autowired
+    private HuggingFaceConfig huggingFaceConfig;
     
     @Override
     public ChatResponse processChat(ChatRequest request) {
@@ -41,6 +51,7 @@ public class ChatServiceImpl implements ChatService {
             
             return new ChatResponse(llmResponse, true, null);
         } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error processing chat request", e);
             return new ChatResponse("Sorry, I encountered an error processing your request.", false, e.getMessage());
         }
     }
@@ -67,25 +78,37 @@ public class ChatServiceImpl implements ChatService {
     
     private String callLlmApi(String prompt) {
         try {
-            // Create completion request
-            CompletionRequest completionRequest = CompletionRequest.builder()
-                .model(llmApiModel)
-                .prompt(prompt)
-                .maxTokens(250)
-                .temperature(0.7)
-                .topP(0.95)
-                .build();
+            // Prepare headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Bearer " + huggingFaceConfig.getApiKey());
             
-            // Call OpenAI API
-            CompletionResult completionResult = openAiService.createCompletion(completionRequest);
+            // Prepare request body
+            HuggingFaceRequest.Parameters parameters = new HuggingFaceRequest.Parameters();
+            HuggingFaceRequest requestBody = new HuggingFaceRequest(prompt, parameters);
             
-            // Extract response text
-            if (completionResult != null && !completionResult.getChoices().isEmpty()) {
-                return completionResult.getChoices().get(0).getText().trim();
+            // Create HTTP entity
+            HttpEntity<HuggingFaceRequest> entity = new HttpEntity<>(requestBody, headers);
+            
+            // Make API call
+            ResponseEntity<HuggingFaceResponse[]> response = restTemplate.postForEntity(
+                huggingFaceConfig.getApiUrl(),
+                entity,
+                HuggingFaceResponse[].class
+            );
+            
+            // Process response
+            if (response.getBody() != null && response.getBody().length > 0) {
+                HuggingFaceResponse hfResponse = response.getBody()[0];
+                if (hfResponse != null && hfResponse.getGenerated_text() != null && !hfResponse.getGenerated_text().isEmpty()) {
+                    return hfResponse.getGenerated_text().get(0).getText().trim();
+                }
             }
             
-            return "I'm sorry, I couldn't generate a response.";
-        } catch (Exception e) {
+            // Fallback if response parsing fails
+            return getFallbackResponse(prompt);
+        } catch (RestClientException e) {
+            logger.log(Level.WARNING, "Error calling Hugging Face API", e);
             // Fallback to simulated responses if API call fails
             return getFallbackResponse(prompt);
         }
