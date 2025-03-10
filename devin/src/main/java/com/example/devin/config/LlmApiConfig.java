@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class HuggingFaceConfig {
+public class LlmApiConfig {
 
     @Value("${llm.api.key}")
     private String apiKey;

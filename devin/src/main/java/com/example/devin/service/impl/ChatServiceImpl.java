@@ -1,10 +1,10 @@
 package com.example.devin.service.impl;
 
-import com.example.devin.config.HuggingFaceConfig;
+import com.example.devin.config.LlmApiConfig;
 import com.example.devin.model.ChatRequest;
 import com.example.devin.model.ChatResponse;
-import com.example.devin.model.HuggingFaceRequest;
-import com.example.devin.model.HuggingFaceResponse;
+import com.example.devin.model.OpenAIRequest;
+import com.example.devin.model.OpenAIResponse;
 import com.example.devin.model.Product;
 import com.example.devin.service.ChatService;
 import com.example.devin.service.ProductService;
@@ -16,8 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,7 +34,7 @@ public class ChatServiceImpl implements ChatService {
     private ProductService productService;
     
     @Autowired
-    private HuggingFaceConfig huggingFaceConfig;
+    private LlmApiConfig llmApiConfig;
     
     @Override
     public ChatResponse processChat(ChatRequest request) {
@@ -59,7 +60,6 @@ public class ChatServiceImpl implements ChatService {
     
     private String createPromptWithProductContext(String userMessage, Product product) {
         return String.format(
-            "You are a helpful customer service assistant for a calligraphy art store.\n\n" +
             "Product Information:\n" +
             "- Name: %s\n" +
             "- Price: $%s\n" +
@@ -82,32 +82,46 @@ public class ChatServiceImpl implements ChatService {
             // Prepare headers
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", "Bearer " + huggingFaceConfig.getApiKey());
+            headers.set("Authorization", "Bearer " + llmApiConfig.getApiKey());
             
-            // Prepare request body - simplify to just include inputs
-            Map<String, Object> requestMap = new HashMap<>();
-            requestMap.put("inputs", prompt);
+            // Prepare request body for OpenAI format
+            OpenAIRequest request = new OpenAIRequest();
+            request.setModel(llmApiConfig.getModel());
+            
+            List<OpenAIRequest.Message> messages = new ArrayList<>();
+            messages.add(new OpenAIRequest.Message("system", "You are a helpful customer service assistant for a calligraphy art store."));
+            messages.add(new OpenAIRequest.Message("user", prompt));
+            request.setMessages(messages);
             
             // Create HTTP entity
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestMap, headers);
+            HttpEntity<OpenAIRequest> entity = new HttpEntity<>(request, headers);
             
             // Make API call
-            ResponseEntity<HuggingFaceResponse> response = restTemplate.postForEntity(
-                huggingFaceConfig.getApiUrl(),
+            ResponseEntity<OpenAIResponse> response = restTemplate.postForEntity(
+                llmApiConfig.getApiUrl(),
                 entity,
-                HuggingFaceResponse.class
+                OpenAIResponse.class
             );
             
             // Process response
-            if (response.getBody() != null && response.getBody().getGenerated_text() != null) {
-                return response.getBody().getGenerated_text().trim();
+            if (response.getBody() != null && 
+                response.getBody().getChoices() != null && 
+                !response.getBody().getChoices().isEmpty() &&
+                response.getBody().getChoices().get(0).getMessage() != null) {
+                
+                logger.info("Successfully received response from LLM API");
+                return response.getBody().getChoices().get(0).getMessage().getContent().trim();
             }
             
             // Fallback if response parsing fails
+            logger.warning("API response was empty or invalid, using fallback response");
             return getFallbackResponse(prompt);
         } catch (RestClientException e) {
-            logger.log(Level.WARNING, "Error calling Hugging Face API", e);
+            logger.log(Level.WARNING, "Error calling LLM API: " + e.getMessage(), e);
             // Fallback to simulated responses if API call fails
+            return getFallbackResponse(prompt);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Unexpected error when calling LLM API: " + e.getMessage(), e);
             return getFallbackResponse(prompt);
         }
     }
