@@ -11,7 +11,7 @@
         <a-menu-item key="products">
           <router-link to="/products">Products</router-link>
         </a-menu-item>
-        <a-menu-item key="admin" v-if="isAdmin">
+        <a-menu-item key="admin" v-if="isLoggedIn">
           <router-link to="/admin/products">Manage Products</router-link>
         </a-menu-item>
         <a-menu-item key="login" v-if="!isLoggedIn">
