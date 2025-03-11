@@ -1,9 +1,10 @@
 <template>
-  <div class="product-detail">
+  <div class="product-detail" style="animation: fadeIn 0.5s ease-out; padding: 20px 0; background: linear-gradient(to bottom, rgba(24, 144, 255, 0.05), transparent 300px);">
     <a-spin :spinning="loading">
       <a-page-header
         :title="product.productName"
         @back="goBack"
+        style="background: linear-gradient(135deg, rgba(24, 144, 255, 0.05), transparent); border-radius: 8px; margin-bottom: 20px;"
       />
       
       <a-row :gutter="24">
@@ -17,7 +18,7 @@
         
         <a-col :span="12">
           <div class="product-info">
-            <h1>{{ product.productName }}</h1>
+            <h1 style="background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">{{ product.productName }}</h1>
             <a-tag color="blue">{{ product.category }}</a-tag>
             
             <div class="price-section">
@@ -32,7 +33,7 @@
             
             <div class="actions">
               <button class="primary-button" @click="showChatModal" type="button">
-                Add to Chat
+                <span style="font-weight: 500;">💬 Add to Chat</span>
               </button>
             </div>
           </div>
@@ -232,29 +233,77 @@ export default {
 
 .product-image {
   width: 100%;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+  border: 4px solid white;
+}
+
+.product-image:hover {
+  transform: scale(1.02);
+  box-shadow: var(--hover-shadow);
 }
 
 .product-info {
-  padding: 0 16px;
+  padding: 0 24px;
+}
+
+.product-info h1 {
+  font-size: 28px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #1890ff;
+  padding-bottom: 8px;
+  font-weight: 600;
+}
+
+:deep(.ant-tag) {
+  font-size: 14px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
 }
 
 .price-section {
   margin: 24px 0;
-  padding: 16px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
+  padding: 20px;
+  background: linear-gradient(to right, rgba(24, 144, 255, 0.05), white);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #1890ff;
+  animation: slideUp 0.5s ease-out;
 }
 
 .price {
   color: #1890ff;
-  font-size: 24px;
+  font-size: 32px;
+  font-weight: bold;
   margin-bottom: 8px;
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
 }
 
 .description-section {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.5s ease-out;
+  border-top: 4px solid #36cfc9;
+}
+
+.description-section h3 {
+  font-size: 20px;
+  margin-bottom: 16px;
+  color: #333333;
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1), transparent);
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 4px;
 }
 
 .actions {
@@ -262,19 +311,25 @@ export default {
 }
 
 .primary-button {
-  background-color: #1890ff;
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
   color: white;
   border: none;
-  border-radius: 2px;
-  padding: 8px 16px;
+  border-radius: 24px;
+  padding: 10px 24px;
   font-size: 16px;
   cursor: pointer;
-  height: 40px;
-  line-height: 24px;
+  height: 48px;
+  line-height: 28px;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  transition: all 0.3s;
+  width: 100%;
+  max-width: 200px;
 }
 
 .primary-button:hover {
-  background-color: #40a9ff;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.5);
+  opacity: 0.9;
 }
 
 .chat-container {
@@ -283,43 +338,7 @@ export default {
   height: 400px;
 }
 
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  margin-bottom: 16px;
-  padding: 8px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-}
-
-.message {
-  display: flex;
-  margin-bottom: 8px;
-  align-items: flex-start;
-}
-
-.message-content {
-  margin-left: 8px;
-  padding: 8px 12px;
-  border-radius: 4px;
-  background-color: white;
-  max-width: 80%;
-}
-
-.user-message .message-content {
-  background-color: #e6f7ff;
-}
-
-.bot-message .message-content {
-  background-color: #f6ffed;
-}
-
-.chat-input {
-  display: flex;
-  gap: 8px;
-}
-
-/* Custom Modal Styles */
+/* Chat modal styling */
 .custom-modal-overlay {
   position: fixed;
   top: 0;
@@ -331,42 +350,57 @@ export default {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(5px);
 }
 
 .custom-modal {
   width: 500px;
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: var(--border-radius);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .custom-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 24px;
+  background: var(--primary-gradient);
+  color: white;
 }
 
 .custom-modal-header h3 {
+  color: white;
   margin: 0;
-  color: rgba(0, 0, 0, 0.85);
   font-weight: 500;
 }
 
 .close-button {
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 24px;
   cursor: pointer;
-  color: rgba(0, 0, 0, 0.45);
+  color: white;
+  transition: all var(--transition-speed);
 }
 
 .close-button:hover {
-  color: rgba(0, 0, 0, 0.85);
+  transform: rotate(90deg);
 }
 
 .chat-messages {
@@ -374,50 +408,98 @@ export default {
   overflow-y: auto;
   margin-bottom: 16px;
   padding: 16px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
+  background: #f8f9fa;
+  border-radius: var(--border-radius);
   height: 300px;
+}
+
+.message {
+  display: flex;
+  margin-bottom: 16px;
+  align-items: flex-start;
+  animation: messageFadeIn 0.3s ease-out;
+}
+
+@keyframes messageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .avatar {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   color: white;
   font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.message-content {
+  margin-left: 8px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  max-width: 80%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.user-message .message-content {
+  background: #e6f7ff;
+  border-top-right-radius: 4px;
+}
+
+.bot-message .message-content {
+  background: #f6ffed;
+  border-top-left-radius: 4px;
+}
+
+.chat-input {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 16px;
 }
 
 .chat-input-field {
   flex: 1;
-  padding: 8px 12px;
+  padding: 12px 16px;
   border: 1px solid #d9d9d9;
-  border-radius: 4px;
+  border-radius: 24px;
   outline: none;
+  transition: all var(--transition-speed);
 }
 
 .chat-input-field:focus {
-  border-color: #40a9ff;
+  border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
 
 .send-button {
-  padding: 8px 16px;
-  background-color: #1890ff;
+  padding: 0 20px;
+  background: var(--primary-gradient);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 24px;
   cursor: pointer;
+  height: 40px;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3);
+  transition: all var(--transition-speed);
 }
 
 .send-button:hover {
-  background-color: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.5);
 }
 
 .send-button:disabled {
-  background-color: #d9d9d9;
-  cursor: not-allowed;
+  background: #d9d9d9;
+  box-shadow: none;
 }
 </style>

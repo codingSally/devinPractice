@@ -1,11 +1,11 @@
 <template>
   <div class="product-management">
-    <h1>Product Management</h1>
+    <h1 class="gradient-title">Product Management</h1>
     
     <a-tabs v-model:activeKey="activeTab">
       <a-tab-pane key="list" tab="Product List">
-        <a-button type="primary" @click="showAddProductModal" style="margin-bottom: 16px">
-          Add New Product
+        <a-button type="primary" @click="showAddProductModal" class="add-product-btn">
+          <span style="font-weight: 500;">Add New Product</span>
         </a-button>
         
         <a-table
@@ -352,5 +352,158 @@ export default {
 <style scoped>
 .product-management {
   padding: 20px 0;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.gradient-title {
+  font-size: 28px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  border-bottom: 2px solid #1890ff;
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+/* Gradient text styling */
+.gradient-text {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  display: inline-block;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 8px;
+}
+
+:deep(.ant-table) {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.5s ease-out;
+  border: none;
+}
+
+:deep(.ant-table-container) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.ant-table-thead > tr > th) {
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%) !important;
+  color: white !important;
+  font-weight: 600;
+  border: none !important;
+  padding: 12px 16px;
+}
+
+:deep(.ant-table-tbody > tr:hover > td) {
+  background: #f0f5ff;
+}
+
+:deep(.ant-table-tbody > tr > td) {
+  transition: all var(--transition-speed);
+}
+
+:deep(.ant-btn) {
+  border-radius: 4px;
+  transition: all var(--transition-speed);
+}
+
+:deep(.ant-btn:hover) {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.add-product-btn {
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%) !important;
+  border: none !important;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3) !important;
+  border-radius: 4px !important;
+  height: 40px;
+  padding: 0 20px !important;
+  transition: all 0.3s !important;
+}
+
+.add-product-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.5) !important;
+}
+
+:deep(.ant-btn-primary:hover) {
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+:deep(.ant-btn-danger) {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  border: none;
+  color: white;
+  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+  transition: all 0.3s;
+}
+
+:deep(.ant-btn-danger:hover) {
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.5);
+}
+
+:deep(.ant-modal-content) {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+:deep(.ant-modal-header) {
+  background: var(--primary-gradient);
+  border-bottom: none;
+}
+
+:deep(.ant-modal-title) {
+  color: white;
+  font-weight: 500;
+}
+
+:deep(.ant-modal-close) {
+  color: white;
+}
+
+:deep(.ant-modal-footer) {
+  border-top: none;
+  padding: 16px 24px 24px;
+}
+
+:deep(.ant-form-item-label > label) {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+:deep(.ant-input), :deep(.ant-input-number), :deep(.ant-select-selector) {
+  border-radius: 4px;
+  transition: all var(--transition-speed);
+}
+
+:deep(.ant-input:focus), :deep(.ant-input-number:focus), :deep(.ant-select-selector:focus) {
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+:deep(.ant-tabs-tab) {
+  transition: all var(--transition-speed);
+}
+
+:deep(.ant-tabs-tab:hover) {
+  color: var(--primary-color);
+}
+
+:deep(.ant-tabs-tab-active) {
+  background: linear-gradient(to right, rgba(24, 144, 255, 0.1), transparent);
+}
+
+:deep(.ant-tabs-ink-bar) {
+  background: var(--primary-gradient);
 }
 </style>
