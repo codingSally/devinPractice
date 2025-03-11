@@ -43,13 +43,10 @@
                     Delete
                   </a-button>
                 </a-popconfirm>
+                <a-button type="primary" size="small" @click="showCopyModal(record)" style="background: #722ed1; border-color: #722ed1;">
+                  Copy
+                </a-button>
               </a-space>
-            </template>
-            
-            <template v-if="column.key === 'copy'">
-              <a-button type="link" size="small" @click="copyProductDetails(record)">
-                Copy
-              </a-button>
             </template>
           </template>
         </a-table>
@@ -58,7 +55,7 @@
     
     <!-- Add/Edit Product Modal -->
     <a-modal
-      :title="isEditing ? 'Edit Product' : 'Add New Product'"
+      :title="isEditing ? 'Edit Product' : (isCopying ? 'Copy Product' : 'Add New Product')"
       :visible="modalVisible"
       @cancel="closeModal"
       :footer="null"
@@ -164,6 +161,7 @@ export default {
     const loading = ref(false);
     const modalVisible = ref(false);
     const isEditing = ref(false);
+    const isCopying = ref(false);
     const submitting = ref(false);
     
     const formState = reactive({
@@ -213,12 +211,7 @@ export default {
       {
         title: 'Actions',
         key: 'action',
-        width: 150
-      },
-      {
-        title: 'Copy',
-        key: 'copy',
-        width: 80
+        width: 220
       }
     ];
     
@@ -275,6 +268,19 @@ export default {
           'Authorization': `Bearer ${token}`
         };
         
+        // Check for duplicate product name if adding or copying
+        if (!isEditing.value) {
+          const isDuplicate = products.value.some(
+            product => product.productName.toLowerCase() === formState.productName.toLowerCase()
+          );
+          
+          if (isDuplicate) {
+            message.error('A product with this name already exists. Please use a different name.');
+            submitting.value = false;
+            return;
+          }
+        }
+        
         if (isEditing.value) {
           await axios.put(`/api/products/${formState.productId}`, formState, { headers });
         } else {
@@ -292,19 +298,24 @@ export default {
     
     const closeModal = () => {
       modalVisible.value = false;
+      isEditing.value = false;
+      isCopying.value = false;
       resetForm();
     };
     
-    const copyProductDetails = (product) => {
-      const details = `Product Name: ${product.productName}\nCategory: ${product.category}\nPrice: $${product.price}\nInventory: ${product.inventory}`;
-      navigator.clipboard.writeText(details)
-        .then(() => {
-          message.success('Product details copied to clipboard!');
-        })
-        .catch(err => {
-          console.error('Failed to copy: ', err);
-          message.error('Failed to copy product details');
-        });
+    const showCopyModal = (product) => {
+      isCopying.value = true;
+      // Pre-fill the form with product details but clear the productId
+      Object.keys(formState).forEach(key => {
+        if (key === 'productId') {
+          formState[key] = null; // Clear productId for new product
+        } else {
+          formState[key] = product[key];
+        }
+      });
+      // Slightly modify the product name to indicate it's a copy
+      formState.productName = `${product.productName} (Copy)`;
+      modalVisible.value = true;
     };
     
     const resetForm = () => {
@@ -333,6 +344,7 @@ export default {
       columns,
       modalVisible,
       isEditing,
+      isCopying,
       formState,
       rules,
       formRef,
@@ -342,7 +354,7 @@ export default {
       deleteProduct,
       submitForm,
       closeModal,
-      copyProductDetails,
+      showCopyModal,
       getCartoonImage
     };
   }

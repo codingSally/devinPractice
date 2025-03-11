@@ -87,13 +87,13 @@ export default {
 
 .logo {
   float: left;
-  width: 180px;
-  height: 31px;
-  margin: 16px 24px 16px 0;
+  width: 200px;
+  height: 36px;
+  margin: 14px 24px 14px 0;
   background: var(--primary-gradient);
   border-radius: var(--border-radius);
   color: white;
-  font-size: 18px;
+  font-size: 22px;
   font-weight: bold;
   display: flex;
   align-items: center;
