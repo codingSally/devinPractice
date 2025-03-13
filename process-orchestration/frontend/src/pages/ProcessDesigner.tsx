@@ -45,6 +45,7 @@ const ProcessDesigner: React.FC = () => {
   const [selectedProcessType, setSelectedProcessType] = useState('sequential');
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionStatus, setExecutionStatus] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Handle connections between nodes
   const onConnect = useCallback(
@@ -109,8 +110,7 @@ const ProcessDesigner: React.FC = () => {
     event.dataTransfer.effectAllowed = 'move';
   };
 
-  // State for execution status display
-  const [isSaving, setIsSaving] = useState(false);
+  // Save process definition
 
   // Save process definition
   const handleSaveProcess = async () => {
@@ -191,7 +191,6 @@ const ProcessDesigner: React.FC = () => {
       setIsExecuting(false);
     } finally {
       setExecuting(false);
-    }
     }
   };
   
