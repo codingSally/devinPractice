@@ -13,7 +13,13 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { createProcessDefinition, executeProcess } from '../services/api';
-import { createNode, convertToProcessDefinition, NODE_TYPE_DEFINITIONS } from '../utils/processUtils';
+import { 
+  createNode, 
+  convertToProcessDefinition, 
+  NODE_TYPE_DEFINITIONS,
+  calculateNodeLevels,
+  areSameLevel
+} from '../utils/processUtils';
 import CustomNode from '../components/CustomNode';
 import NodeTypeItem from '../components/NodeTypeItem';
 
@@ -38,22 +44,36 @@ const ProcessDesigner: React.FC = () => {
   // Handle connections between nodes
   const onConnect = useCallback(
     (params: Connection) => {
-      // Create edge with animated style and arrow marker
+      // Calculate node levels to determine if nodes are on the same level
+      const levels = calculateNodeLevels(nodes, edges);
+      const sourceNode = nodes.find(n => n.id === params.source);
+      const targetNode = nodes.find(n => n.id === params.target);
+      
+      // Determine if the connection is between nodes on the same level
+      const sameLevel = sourceNode && targetNode && 
+        levels[sourceNode.id] === levels[targetNode.id];
+      
+      // Create edge with appropriate style based on connection type
       const edge = {
         ...params,
         type: 'smoothstep',
         animated: true,
-        style: { stroke: '#555' },
+        data: { sameLevel },
+        style: { 
+          stroke: sameLevel ? '#2979FF' : '#555',
+          strokeDasharray: sameLevel ? '5,5' : 'none',
+          strokeWidth: sameLevel ? 1.5 : 2
+        },
         markerEnd: {
           type: MarkerType.ArrowClosed,
           width: 20,
           height: 20,
-          color: '#555',
+          color: sameLevel ? '#2979FF' : '#555',
         },
       };
       setEdges((eds) => addEdge(edge, eds));
     },
-    [setEdges]
+    [nodes, edges, setEdges]
   );
 
   // Handle drag over for dropping nodes
@@ -143,20 +163,28 @@ const ProcessDesigner: React.FC = () => {
 
   // Add example nodes for testing
   const addExampleProcess = () => {
+    // Create nodes for different levels to demonstrate breadth-first traversal
     const loggingNode = createNode('logging', { x: 250, y: 100 });
-    const httpNode = createNode('http', { x: 250, y: 250 });
-    const scriptNode = createNode('script', { x: 450, y: 250 });
+    const httpNode = createNode('http', { x: 150, y: 250 });
+    const scriptNode = createNode('script', { x: 350, y: 250 });
     const conditionalNode = createNode('conditional', { x: 250, y: 400 });
     
-    setNodes([loggingNode, httpNode, scriptNode, conditionalNode]);
+    // Add additional nodes to demonstrate parallel execution
+    const loggingNode2 = createNode('logging', { x: 550, y: 100 });
+    const httpNode2 = createNode('http', { x: 550, y: 250 });
     
+    setNodes([loggingNode, httpNode, scriptNode, conditionalNode, loggingNode2, httpNode2]);
+    
+    // Create edges with appropriate styling for level relationships
     const newEdges = [
+      // Level 0 to Level 1 connections (sequential)
       {
         id: `${loggingNode.id}-${httpNode.id}`,
         source: loggingNode.id,
         target: httpNode.id,
         type: 'smoothstep',
         animated: true,
+        data: { sameLevel: false },
         style: { stroke: '#555' },
         markerEnd: {
           type: MarkerType.ArrowClosed,
@@ -171,6 +199,7 @@ const ProcessDesigner: React.FC = () => {
         target: scriptNode.id,
         type: 'smoothstep',
         animated: true,
+        data: { sameLevel: false },
         style: { stroke: '#555' },
         markerEnd: {
           type: MarkerType.ArrowClosed,
@@ -179,12 +208,14 @@ const ProcessDesigner: React.FC = () => {
           color: '#555',
         },
       },
+      // Level 1 to Level 2 connections (sequential)
       {
         id: `${httpNode.id}-${conditionalNode.id}`,
         source: httpNode.id,
         target: conditionalNode.id,
         type: 'smoothstep',
         animated: true,
+        data: { sameLevel: false },
         style: { stroke: '#555' },
         markerEnd: {
           type: MarkerType.ArrowClosed,
@@ -199,6 +230,7 @@ const ProcessDesigner: React.FC = () => {
         target: conditionalNode.id,
         type: 'smoothstep',
         animated: true,
+        data: { sameLevel: false },
         style: { stroke: '#555' },
         markerEnd: {
           type: MarkerType.ArrowClosed,
@@ -207,12 +239,81 @@ const ProcessDesigner: React.FC = () => {
           color: '#555',
         },
       },
+      // Same level connection (parallel) - Level 0
+      {
+        id: `${loggingNode.id}-${loggingNode2.id}`,
+        source: loggingNode.id,
+        target: loggingNode2.id,
+        type: 'smoothstep',
+        animated: true,
+        data: { sameLevel: true },
+        style: { 
+          stroke: '#2979FF',
+          strokeDasharray: '5,5',
+          strokeWidth: 1.5
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 20,
+          height: 20,
+          color: '#2979FF',
+        },
+      },
+      // Level 0 to Level 1 connection
+      {
+        id: `${loggingNode2.id}-${httpNode2.id}`,
+        source: loggingNode2.id,
+        target: httpNode2.id,
+        type: 'smoothstep',
+        animated: true,
+        data: { sameLevel: false },
+        style: { stroke: '#555' },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 20,
+          height: 20,
+          color: '#555',
+        },
+      },
+      // Same level connection (parallel) - Level 1
+      {
+        id: `${httpNode.id}-${httpNode2.id}`,
+        source: httpNode.id,
+        target: httpNode2.id,
+        type: 'smoothstep',
+        animated: true,
+        data: { sameLevel: true },
+        style: { 
+          stroke: '#2979FF',
+          strokeDasharray: '5,5',
+          strokeWidth: 1.5
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 20,
+          height: 20,
+          color: '#2979FF',
+        },
+      },
     ];
     
     setEdges(newEdges);
-    toast.info('Example process created');
+    toast.info('Example process created with breadth-first traversal visualization');
   };
 
+  // Calculate node levels for visualization
+  const nodeLevels = calculateNodeLevels(nodes, edges);
+  
+  // Group nodes by level for display
+  const nodesByLevel: Record<number, Node[]> = {};
+  nodes.forEach(node => {
+    const level = nodeLevels[node.id] || 0;
+    if (!nodesByLevel[level]) {
+      nodesByLevel[level] = [];
+    }
+    nodesByLevel[level].push(node);
+  });
+  
   return (
     <div className="app-container">
       <div className="sidebar">
@@ -264,7 +365,7 @@ const ProcessDesigner: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
           </div>
-          <div>
+          <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Description</label>
             <textarea
               value={processDescription}
@@ -273,6 +374,35 @@ const ProcessDesigner: React.FC = () => {
               rows={3}
             />
           </div>
+          
+          {/* Execution Level Legend */}
+          <div className="execution-legend mb-4">
+            <h4 className="text-sm font-semibold mb-2">Execution Legend</h4>
+            <div className="flex items-center mb-1">
+              <div className="w-4 h-1 bg-gray-600 mr-2"></div>
+              <span className="text-xs">Sequential Execution</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-4 h-1 bg-blue-500 mr-2" style={{ borderStyle: 'dashed' }}></div>
+              <span className="text-xs">Parallel Execution (Same Level)</span>
+            </div>
+          </div>
+          
+          {/* Node Level Information */}
+          {Object.keys(nodesByLevel).length > 0 && (
+            <div className="level-info">
+              <h4 className="text-sm font-semibold mb-2">Execution Levels</h4>
+              {Object.entries(nodesByLevel).map(([level, levelNodes]) => (
+                <div key={level} className="mb-2">
+                  <div className="text-xs font-medium">Level {level}:</div>
+                  <div className="text-xs text-gray-600">
+                    {levelNodes.map(node => node.data.label).join(', ')}
+                    <span className="text-xs text-gray-500"> (Parallel)</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       
