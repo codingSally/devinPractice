@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ProcessDesigner from './pages/ProcessDesigner';
+import './App.css';
 
 const App: React.FC = () => {
   return (
