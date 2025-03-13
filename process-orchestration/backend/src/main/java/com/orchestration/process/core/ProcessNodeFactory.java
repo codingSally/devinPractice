@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Factory for creating process nodes.
@@ -17,33 +18,33 @@ public class ProcessNodeFactory {
     
     public ProcessNodeFactory() {
         // Register default node types
-        registerNodeType("logging", () -> 
-            ProcessNode.builder()
-                .type("logging")
-                .properties(new HashMap<>())
-                .build()
-        );
+        registerNodeType("logging", () -> {
+            ProcessNode node = new ProcessNode();
+            node.setType("logging");
+            node.setProperties(new ConcurrentHashMap<>());
+            return node;
+        });
         
-        registerNodeType("http", () -> 
-            ProcessNode.builder()
-                .type("http")
-                .properties(new HashMap<>())
-                .build()
-        );
+        registerNodeType("http", () -> {
+            ProcessNode node = new ProcessNode();
+            node.setType("http");
+            node.setProperties(new ConcurrentHashMap<>());
+            return node;
+        });
         
-        registerNodeType("script", () -> 
-            ProcessNode.builder()
-                .type("script")
-                .properties(new HashMap<>())
-                .build()
-        );
+        registerNodeType("script", () -> {
+            ProcessNode node = new ProcessNode();
+            node.setType("script");
+            node.setProperties(new ConcurrentHashMap<>());
+            return node;
+        });
         
-        registerNodeType("conditional", () -> 
-            ProcessNode.builder()
-                .type("conditional")
-                .properties(new HashMap<>())
-                .build()
-        );
+        registerNodeType("conditional", () -> {
+            ProcessNode node = new ProcessNode();
+            node.setType("conditional");
+            node.setProperties(new ConcurrentHashMap<>());
+            return node;
+        });
     }
     
     /**
