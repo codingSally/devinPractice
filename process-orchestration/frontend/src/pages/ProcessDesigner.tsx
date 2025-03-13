@@ -12,7 +12,7 @@ import ReactFlow, {
   Node,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { createProcessDefinition, executeProcess } from '../services/api';
+import { createProcessDefinition, executeProcess, getProcessExecutionStatus } from '../services/api';
 import {
   createSequentialProcess,
   createParallelProcess,
@@ -109,13 +109,17 @@ const ProcessDesigner: React.FC = () => {
     event.dataTransfer.effectAllowed = 'move';
   };
 
+  // State for execution status display
+  const [isSaving, setIsSaving] = useState(false);
+
   // Save process definition
   const handleSaveProcess = async () => {
     if (nodes.length === 0) {
       toast.warning('Please add at least one node to the process');
-      return;
+      return null;
     }
 
+    setIsSaving(true);
     try {
       // Create process definition from nodes and edges
       const processDefinition = convertToProcessDefinition(
@@ -130,40 +134,56 @@ const ProcessDesigner: React.FC = () => {
       // For demo purposes, simulate successful save if backend is not available
       try {
         const response = await createProcessDefinition(processDefinition);
-        setCurrentProcessId(response.data.id || 1); // Use response ID or fallback to 1
+        const processId = response.data.id || Math.floor(Math.random() * 1000);
+        setCurrentProcessId(processId);
         toast.success('Process saved successfully!');
+        return processId;
       } catch (apiError) {
         console.warn('API error, using mock response:', apiError);
         // Mock successful response for demo
-        setCurrentProcessId(1);
+        const mockId = Math.floor(Math.random() * 1000);
+        setCurrentProcessId(mockId);
         toast.success('Process saved successfully! (Demo Mode)');
+        return mockId;
       }
     } catch (error) {
       console.error('Failed to save process:', error);
       toast.error('Failed to save process. Please check your configuration.');
+      return null;
+    } finally {
+      setIsSaving(false);
     }
   };
 
   // Execute process
   const handleExecuteProcess = async () => {
-    if (!currentProcessId) {
+    // Save the process first to ensure we have the latest version
+    const processId = await handleSaveProcess();
+    
+    if (!processId) {
       toast.warning('Please save the process first');
       return;
     }
 
     setExecuting(true);
     setIsExecuting(true);
+    setExecutionStatus(null);
     try {
       try {
-        await executeProcess(currentProcessId);
+        const response = await executeProcess(processId);
+        const executionId = response.data.executionId || Math.floor(Math.random() * 1000);
+        
         toast.success('Process execution started!');
         
-        // Simulate execution status updates
-        simulateExecutionStatus(currentProcessId);
+        // Start polling for execution status
+        pollExecutionStatus(executionId);
       } catch (apiError) {
         console.warn('API error during execution, using mock response:', apiError);
         // Mock successful execution for demo
-        simulateExecutionStatus(currentProcessId);
+        const mockExecutionId = Math.floor(Math.random() * 1000);
+        
+        // Simulate execution status updates
+        simulateExecutionStatus(mockExecutionId, processId);
       }
     } catch (error) {
       console.error('Failed to execute process:', error);
@@ -172,72 +192,97 @@ const ProcessDesigner: React.FC = () => {
     } finally {
       setExecuting(false);
     }
+    }
   };
   
-  // Simulate execution status updates for demo purposes
-  const simulateExecutionStatus = (processId: number) => {
-    // Initial status
+  // Poll for execution status updates
+  const pollExecutionStatus = (executionId: number) => {
+    let pollCount = 0;
+    const maxPolls = 10; // Prevent infinite polling
+    
+    const poll = async () => {
+      if (pollCount >= maxPolls) {
+        setIsExecuting(false);
+        return;
+      }
+      
+      try {
+        const response = await getProcessExecutionStatus(executionId);
+        const status = response.data;
+        
+        setExecutionStatus(status);
+        
+        // Check if execution is complete
+        if (['COMPLETED', 'FAILED'].includes(status.status)) {
+          setIsExecuting(false);
+          
+          if (status.status === 'COMPLETED') {
+            toast.success('Process execution completed successfully!');
+          } else {
+            toast.error(`Process execution failed: ${status.error}`);
+          }
+        } else {
+          // Continue polling
+          pollCount++;
+          setTimeout(poll, 2000);
+        }
+      } catch (error) {
+        console.error('Error polling execution status:', error);
+        pollCount++;
+        setTimeout(poll, 2000);
+      }
+    };
+    
+    // Start polling
+    poll();
+  };
+  
+  // Simulate execution status updates for demo
+  const simulateExecutionStatus = (executionId: number, processId: number) => {
+    // Initial status - PENDING
     setExecutionStatus({
-      id: Math.floor(Math.random() * 1000),
-      processId,
+      id: executionId,
+      processId: processId,
       status: 'PENDING',
-      startTime: new Date().toISOString(),
-      currentNodeId: null
+      startTime: new Date().toISOString()
     });
     
-    // Simulate status updates
+    // After 1 second - RUNNING
     setTimeout(() => {
-      const nodes = document.querySelectorAll('.react-flow__node');
-      const nodeIds = Array.from(nodes).map(node => node.getAttribute('data-id')).filter(Boolean);
-      
-      if (nodeIds.length > 0) {
-        setExecutionStatus((prev: any) => ({
-          ...prev,
-          status: 'RUNNING',
-          currentNodeId: nodeIds[0]
-        }));
-        
-        // Simulate processing through nodes
-        let currentIndex = 0;
-        
-        const interval = setInterval(() => {
-          currentIndex++;
-          
-          if (currentIndex < nodeIds.length) {
-            setExecutionStatus((prev: any) => ({
-              ...prev,
-              currentNodeId: nodeIds[currentIndex]
-            }));
-          } else {
-            clearInterval(interval);
-            
-            // Complete execution
-            setExecutionStatus((prev: any) => ({
-              ...prev,
-              status: 'COMPLETED',
-              endTime: new Date().toISOString(),
-              currentNodeId: null,
-              result: {
-                processedNodes: nodeIds.length,
-                executionTime: `${(Math.random() * 2 + 0.5).toFixed(2)}s`,
-                output: 'Process completed successfully'
-              }
-            }));
-            
-            setIsExecuting(false);
-          }
-        }, 1500);
-      } else {
-        setExecutionStatus((prev: any) => ({
-          ...prev,
-          status: 'FAILED',
-          endTime: new Date().toISOString(),
-          error: 'No nodes found in the process'
-        }));
-        
-        setIsExecuting(false);
-      }
+      setExecutionStatus({
+        id: executionId,
+        processId: processId,
+        status: 'RUNNING',
+        startTime: new Date().toISOString(),
+        currentNodeId: nodes[0]?.id || 'node-1'
+      });
     }, 1000);
+    
+    // After 3 seconds - update current node
+    setTimeout(() => {
+      setExecutionStatus({
+        id: executionId,
+        processId: processId,
+        status: 'RUNNING',
+        startTime: new Date().toISOString(),
+        currentNodeId: nodes[1]?.id || 'node-2'
+      });
+    }, 3000);
+    
+    // After 5 seconds - COMPLETED
+    setTimeout(() => {
+      setExecutionStatus({
+        id: executionId,
+        processId: processId,
+        status: 'COMPLETED',
+        startTime: new Date().toISOString(),
+        endTime: new Date().toISOString(),
+        result: { message: 'Process executed successfully (mock)' }
+      });
+      
+      setIsExecuting(false);
+      toast.success('Process execution completed! (Demo Mode)');
+    }, 5000);
   };
 
   // Add example nodes for testing
@@ -296,15 +341,16 @@ const ProcessDesigner: React.FC = () => {
           <button
             className="w-full mb-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             onClick={handleSaveProcess}
+            disabled={isSaving}
           >
-            Save Process
+            {isSaving ? 'Saving...' : 'Save Process'}
           </button>
           <button
             className="w-full mb-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
             onClick={handleExecuteProcess}
-            disabled={!currentProcessId || executing}
+            disabled={isExecuting}
           >
-            {executing ? 'Executing...' : 'Execute Process'}
+            {isExecuting ? 'Executing...' : 'Execute Process'}
           </button>
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Process Type</label>
@@ -337,7 +383,7 @@ const ProcessDesigner: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
           </div>
-          <div>
+          <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Description</label>
             <textarea
               value={processDescription}
@@ -346,6 +392,54 @@ const ProcessDesigner: React.FC = () => {
               rows={3}
             />
           </div>
+          
+          {/* Execution Status */}
+          {(isExecuting || executionStatus) && (
+            <div className="execution-status mt-4">
+              <h3 className="text-lg font-semibold mb-2">Execution Status</h3>
+              
+              <div className="status-indicator flex items-center mb-2">
+                <div 
+                  className="w-3 h-3 rounded-full mr-2" 
+                  style={{ 
+                    backgroundColor: executionStatus ? 
+                      (executionStatus.status === 'COMPLETED' ? '#10b981' : 
+                       executionStatus.status === 'FAILED' ? '#ef4444' : 
+                       executionStatus.status === 'RUNNING' ? '#3b82f6' : '#f59e0b') 
+                      : '#f59e0b'
+                  }}
+                ></div>
+                <span className="font-medium">
+                  {executionStatus ? executionStatus.status : 'INITIALIZING'}
+                </span>
+              </div>
+              
+              {executionStatus && (
+                <div className="status-details text-sm">
+                  <div className="grid grid-cols-2 gap-1">
+                    {executionStatus.currentNodeId && (
+                      <>
+                        <div className="text-gray-600">Current Node:</div>
+                        <div>{executionStatus.currentNodeId}</div>
+                      </>
+                    )}
+                    
+                    {executionStatus.result && (
+                      <div className="col-span-2 mt-2 p-2 bg-gray-100 rounded text-xs">
+                        <pre>{JSON.stringify(executionStatus.result, null, 2)}</pre>
+                      </div>
+                    )}
+                    
+                    {executionStatus.error && (
+                      <div className="col-span-2 mt-2 text-red-600">
+                        Error: {executionStatus.error}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
       
