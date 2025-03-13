@@ -191,7 +191,7 @@ const ProcessDesigner: React.FC = () => {
       const nodeIds = Array.from(nodes).map(node => node.getAttribute('data-id')).filter(Boolean);
       
       if (nodeIds.length > 0) {
-        setExecutionStatus(prev => ({
+        setExecutionStatus((prev: any) => ({
           ...prev,
           status: 'RUNNING',
           currentNodeId: nodeIds[0]
@@ -204,7 +204,7 @@ const ProcessDesigner: React.FC = () => {
           currentIndex++;
           
           if (currentIndex < nodeIds.length) {
-            setExecutionStatus(prev => ({
+            setExecutionStatus((prev: any) => ({
               ...prev,
               currentNodeId: nodeIds[currentIndex]
             }));
@@ -212,7 +212,7 @@ const ProcessDesigner: React.FC = () => {
             clearInterval(interval);
             
             // Complete execution
-            setExecutionStatus(prev => ({
+            setExecutionStatus((prev: any) => ({
               ...prev,
               status: 'COMPLETED',
               endTime: new Date().toISOString(),
@@ -228,7 +228,7 @@ const ProcessDesigner: React.FC = () => {
           }
         }, 1500);
       } else {
-        setExecutionStatus(prev => ({
+        setExecutionStatus((prev: any) => ({
           ...prev,
           status: 'FAILED',
           endTime: new Date().toISOString(),
