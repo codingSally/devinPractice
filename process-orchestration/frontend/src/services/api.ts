@@ -1,28 +1,44 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: 'http://localhost:8080/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 10000, // 10 seconds timeout
+});
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error.response || error.message);
+    return Promise.reject(error);
+  }
+);
 
 // Create a new process definition
 export const createProcessDefinition = (processDefinition: any) => {
-  return axios.post(`${API_BASE_URL}/processes`, processDefinition);
+  return api.post('/processes', processDefinition);
 };
 
 // Execute a process
 export const executeProcess = (processId: number) => {
-  return axios.post(`${API_BASE_URL}/processes/${processId}/execute`);
+  return api.post(`/processes/${processId}/execute`);
 };
 
 // Get all process definitions
 export const getProcessDefinitions = () => {
-  return axios.get(`${API_BASE_URL}/processes`);
+  return api.get('/processes');
 };
 
 // Get a specific process definition
 export const getProcessDefinition = (processId: number) => {
-  return axios.get(`${API_BASE_URL}/processes/${processId}`);
+  return api.get(`/processes/${processId}`);
 };
 
 // Get all node types
 export const getNodeTypes = () => {
-  return axios.get(`${API_BASE_URL}/node-types`);
+  return api.get('/node-types');
 };
