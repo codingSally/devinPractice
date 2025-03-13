@@ -9,6 +9,7 @@ import ReactFlow, {
   Background,
   Connection,
   MarkerType,
+  Node,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { createProcessDefinition, executeProcess } from '../services/api';
@@ -83,6 +84,9 @@ const ProcessDesigner: React.FC = () => {
         // Create a new node with the dropped type
         const newNode = createNode(type, position);
         setNodes((nds) => nds.concat(newNode));
+        
+        // Show success toast
+        toast.success(`Added ${NODE_TYPE_DEFINITIONS[type as keyof typeof NODE_TYPE_DEFINITIONS].label}`);
       }
     },
     [reactFlowInstance, setNodes]
@@ -137,6 +141,64 @@ const ProcessDesigner: React.FC = () => {
     }
   };
 
+  // Add example nodes for testing
+  const addExampleProcess = () => {
+    const loggingNode = createNode('logging', { x: 250, y: 100 });
+    const httpNode = createNode('http', { x: 250, y: 250 });
+    const scriptNode = createNode('script', { x: 450, y: 250 });
+    const conditionalNode = createNode('conditional', { x: 250, y: 400 });
+    
+    setNodes([loggingNode, httpNode, scriptNode, conditionalNode]);
+    
+    const newEdges = [
+      {
+        id: `${loggingNode.id}-${httpNode.id}`,
+        source: loggingNode.id,
+        target: httpNode.id,
+        type: 'smoothstep',
+        animated: true,
+        style: { stroke: '#555' },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 20,
+          height: 20,
+          color: '#555',
+        },
+      },
+      {
+        id: `${httpNode.id}-${scriptNode.id}`,
+        source: httpNode.id,
+        target: scriptNode.id,
+        type: 'smoothstep',
+        animated: true,
+        style: { stroke: '#555' },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 20,
+          height: 20,
+          color: '#555',
+        },
+      },
+      {
+        id: `${httpNode.id}-${conditionalNode.id}`,
+        source: httpNode.id,
+        target: conditionalNode.id,
+        type: 'smoothstep',
+        animated: true,
+        style: { stroke: '#555' },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 20,
+          height: 20,
+          color: '#555',
+        },
+      },
+    ];
+    
+    setEdges(newEdges);
+    toast.info('Example process created');
+  };
+
   return (
     <div className="app-container">
       <div className="sidebar">
@@ -184,13 +246,20 @@ const ProcessDesigner: React.FC = () => {
             Save Process
           </button>
           
-          {currentProcessId && (
+          {currentProcessId ? (
             <button
               onClick={handleExecuteProcess}
               disabled={executing}
-              className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50"
+              className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 mb-2"
             >
               {executing ? 'Executing...' : 'Execute Process'}
+            </button>
+          ) : (
+            <button
+              onClick={addExampleProcess}
+              className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors mb-2"
+            >
+              Create Example Process
             </button>
           )}
         </div>

@@ -40,6 +40,12 @@
   cursor: move;
   color: white;
   font-weight: 500;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.node-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .node-item-logging {
@@ -56,4 +62,115 @@
 
 .node-item-conditional {
   background-color: #9C27B0;
+}
+
+.react-flow__node {
+  padding: 10px;
+  border-radius: 5px;
+  width: 180px;
+  font-size: 12px;
+  color: #222;
+  text-align: center;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.react-flow__node-logging {
+  background: #4CAF50;
+  color: white;
+  border-color: #2E7D32;
+}
+
+.react-flow__node-http {
+  background: #2196F3;
+  color: white;
+  border-color: #0D47A1;
+}
+
+.react-flow__node-script {
+  background: #FF9800;
+  color: white;
+  border-color: #E65100;
+}
+
+.react-flow__node-conditional {
+  background: #9C27B0;
+  color: white;
+  border-color: #4A148C;
+}
+
+.react-flow__handle {
+  width: 8px;
+  height: 8px;
+  background-color: #555;
+}
+
+.react-flow__edge-path {
+  stroke: #555;
+  stroke-width: 2;
+}
+
+.react-flow__edge-text {
+  font-size: 10px;
+}
+
+.react-flow__edge-textbg {
+  fill: white;
+}
+
+.dndflow {
+  flex-direction: column;
+  display: flex;
+  height: 100%;
+}
+
+.dndflow aside {
+  border-right: 1px solid #eee;
+  padding: 15px 10px;
+  font-size: 12px;
+  background: #fcfcfc;
+}
+
+.dndflow aside .description {
+  margin-bottom: 10px;
+}
+
+.dndflow .dndnode {
+  height: 20px;
+  padding: 4px;
+  border: 1px solid #1a192b;
+  border-radius: 2px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+}
+
+.dndflow .dndnode.input {
+  border-color: #0041d0;
+}
+
+.dndflow .dndnode.output {
+  border-color: #ff0072;
+}
+
+.dndflow .reactflow-wrapper {
+  flex-grow: 1;
+  height: 100%;
+}
+
+.dndflow .selectall {
+  margin-top: 10px;
+}
+
+@media screen and (min-width: 768px) {
+  .dndflow {
+    flex-direction: row;
+  }
+
+  .dndflow aside {
+    width: 20%;
+    max-width: 250px;
+  }
 }

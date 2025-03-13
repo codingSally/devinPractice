@@ -5,7 +5,7 @@ interface NodeTypeItemProps {
   label: string;
   description: string;
   color: string;
-  onDragStart: (event: React.DragEvent<HTMLDivElement>, nodeType: string) => void;
+  onDragStart: (event: React.DragEvent, nodeType: string) => void;
 }
 
 const NodeTypeItem: React.FC<NodeTypeItemProps> = ({
@@ -17,7 +17,7 @@ const NodeTypeItem: React.FC<NodeTypeItemProps> = ({
 }) => {
   return (
     <div
-      className="p-3 rounded-md cursor-move transition-all hover:shadow-md mb-2"
+      className={`node-item node-item-${type}`}
       style={{ 
         backgroundColor: color, 
         color: 'white',
