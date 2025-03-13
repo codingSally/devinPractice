@@ -42,3 +42,8 @@ export const getProcessDefinition = (processId: number) => {
 export const getNodeTypes = () => {
   return api.get('/node-types');
 };
+
+// Get process execution status
+export const getProcessExecutionStatus = (executionId: number) => {
+  return api.get(`/executions/${executionId}`);
+};
