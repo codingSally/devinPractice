@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Handle, Position, NodeProps } from 'react-flow-renderer';
+import { Handle, Position, NodeProps } from 'reactflow';
 
 interface CustomNodeProps extends NodeProps {
   data: {

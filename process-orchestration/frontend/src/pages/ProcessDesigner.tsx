@@ -8,11 +8,10 @@ import ReactFlow, {
   Controls,
   Background,
   Connection,
-  Edge,
-  Node,
   MarkerType,
-} from 'react-flow-renderer';
-import { createProcessDefinition, executeProcess, getNodeTypes } from '../services/api';
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import { createProcessDefinition, executeProcess } from '../services/api';
 import { createNode, convertToProcessDefinition, NODE_TYPE_DEFINITIONS } from '../utils/processUtils';
 import CustomNode from '../components/CustomNode';
 import NodeTypeItem from '../components/NodeTypeItem';
