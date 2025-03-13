@@ -13,9 +13,17 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { createProcessDefinition, executeProcess } from '../services/api';
+import {
+  createSequentialProcess,
+  createParallelProcess,
+  createConditionalProcess,
+  createComplexProcess
+} from '../data/testProcesses';
 import { createNode, convertToProcessDefinition, NODE_TYPE_DEFINITIONS } from '../utils/processUtils';
 import CustomNode from '../components/CustomNode';
 import NodeTypeItem from '../components/NodeTypeItem';
+import ProcessLegend from '../components/ProcessLegend';
+import ProcessControls from '../components/ProcessControls';
 
 // Define node types for ReactFlow
 const nodeTypes = {
@@ -34,6 +42,9 @@ const ProcessDesigner: React.FC = () => {
   const [processDescription, setProcessDescription] = useState('Process description');
   const [currentProcessId, setCurrentProcessId] = useState<number | null>(null);
   const [executing, setExecuting] = useState(false);
+  const [selectedProcessType, setSelectedProcessType] = useState('sequential');
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [executionStatus, setExecutionStatus] = useState<any>(null);
 
   // Handle connections between nodes
   const onConnect = useCallback(
@@ -141,95 +152,125 @@ const ProcessDesigner: React.FC = () => {
     }
 
     setExecuting(true);
+    setIsExecuting(true);
     try {
       try {
         await executeProcess(currentProcessId);
         toast.success('Process execution started!');
+        
+        // Simulate execution status updates
+        simulateExecutionStatus(currentProcessId);
       } catch (apiError) {
         console.warn('API error during execution, using mock response:', apiError);
         // Mock successful execution for demo
-        setTimeout(() => {
-          toast.success('Process execution completed! (Demo Mode)');
-        }, 2000);
+        simulateExecutionStatus(currentProcessId);
       }
     } catch (error) {
       console.error('Failed to execute process:', error);
       toast.error('Failed to execute process. Please try again.');
+      setIsExecuting(false);
     } finally {
       setExecuting(false);
     }
   };
+  
+  // Simulate execution status updates for demo purposes
+  const simulateExecutionStatus = (processId: number) => {
+    // Initial status
+    setExecutionStatus({
+      id: Math.floor(Math.random() * 1000),
+      processId,
+      status: 'PENDING',
+      startTime: new Date().toISOString(),
+      currentNodeId: null
+    });
+    
+    // Simulate status updates
+    setTimeout(() => {
+      const nodes = document.querySelectorAll('.react-flow__node');
+      const nodeIds = Array.from(nodes).map(node => node.getAttribute('data-id')).filter(Boolean);
+      
+      if (nodeIds.length > 0) {
+        setExecutionStatus(prev => ({
+          ...prev,
+          status: 'RUNNING',
+          currentNodeId: nodeIds[0]
+        }));
+        
+        // Simulate processing through nodes
+        let currentIndex = 0;
+        
+        const interval = setInterval(() => {
+          currentIndex++;
+          
+          if (currentIndex < nodeIds.length) {
+            setExecutionStatus(prev => ({
+              ...prev,
+              currentNodeId: nodeIds[currentIndex]
+            }));
+          } else {
+            clearInterval(interval);
+            
+            // Complete execution
+            setExecutionStatus(prev => ({
+              ...prev,
+              status: 'COMPLETED',
+              endTime: new Date().toISOString(),
+              currentNodeId: null,
+              result: {
+                processedNodes: nodeIds.length,
+                executionTime: `${(Math.random() * 2 + 0.5).toFixed(2)}s`,
+                output: 'Process completed successfully'
+              }
+            }));
+            
+            setIsExecuting(false);
+          }
+        }, 1500);
+      } else {
+        setExecutionStatus(prev => ({
+          ...prev,
+          status: 'FAILED',
+          endTime: new Date().toISOString(),
+          error: 'No nodes found in the process'
+        }));
+        
+        setIsExecuting(false);
+      }
+    }, 1000);
+  };
 
   // Add example nodes for testing
   const addExampleProcess = () => {
-    const loggingNode = createNode('logging', { x: 250, y: 100 });
-    const httpNode = createNode('http', { x: 250, y: 250 });
-    const scriptNode = createNode('script', { x: 450, y: 250 });
-    const conditionalNode = createNode('conditional', { x: 250, y: 400 });
+    let processConfig;
     
-    setNodes([loggingNode, httpNode, scriptNode, conditionalNode]);
+    // Select process configuration based on type
+    switch (selectedProcessType) {
+      case 'sequential':
+        processConfig = createSequentialProcess();
+        break;
+      case 'parallel':
+        processConfig = createParallelProcess();
+        break;
+      case 'conditional':
+        processConfig = createConditionalProcess();
+        break;
+      case 'complex':
+        processConfig = createComplexProcess();
+        break;
+      default:
+        processConfig = createSequentialProcess();
+    }
     
-    const newEdges = [
-      {
-        id: `${loggingNode.id}-${httpNode.id}`,
-        source: loggingNode.id,
-        target: httpNode.id,
-        type: 'smoothstep',
-        animated: true,
-        style: { stroke: '#555' },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 20,
-          height: 20,
-          color: '#555',
-        },
-      },
-      {
-        id: `${loggingNode.id}-${scriptNode.id}`,
-        source: loggingNode.id,
-        target: scriptNode.id,
-        type: 'smoothstep',
-        animated: true,
-        style: { stroke: '#555' },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 20,
-          height: 20,
-          color: '#555',
-        },
-      },
-      {
-        id: `${httpNode.id}-${conditionalNode.id}`,
-        source: httpNode.id,
-        target: conditionalNode.id,
-        type: 'smoothstep',
-        animated: true,
-        style: { stroke: '#555' },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 20,
-          height: 20,
-          color: '#555',
-        },
-      },
-      {
-        id: `${scriptNode.id}-${conditionalNode.id}`,
-        source: scriptNode.id,
-        target: conditionalNode.id,
-        type: 'smoothstep',
-        animated: true,
-        style: { stroke: '#555' },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 20,
-          height: 20,
-          color: '#555',
-        },
-      },
-    ];
+    // Set nodes and edges
+    setNodes(processConfig.nodes);
+    setEdges(processConfig.edges);
     
-    setEdges(newEdges);
-    toast.info('Example process created');
+    // Update process name and description based on type
+    setProcessName(`${selectedProcessType.charAt(0).toUpperCase() + selectedProcessType.slice(1)} Process`);
+    setProcessDescription(`A ${selectedProcessType} process orchestration example demonstrating ${selectedProcessType} execution flow.`);
+    
+    toast.info(`${selectedProcessType.charAt(0).toUpperCase() + selectedProcessType.slice(1)} process created`);
   };
 
   return (
@@ -265,6 +306,19 @@ const ProcessDesigner: React.FC = () => {
           >
             {executing ? 'Executing...' : 'Execute Process'}
           </button>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Process Type</label>
+            <select
+              value={selectedProcessType}
+              onChange={(e) => setSelectedProcessType(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="sequential">Sequential Process</option>
+              <option value="parallel">Parallel Process</option>
+              <option value="conditional">Conditional Process</option>
+              <option value="complex">Complex Multi-Level Process</option>
+            </select>
+          </div>
           <button
             className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
             onClick={addExampleProcess}
@@ -312,8 +366,73 @@ const ProcessDesigner: React.FC = () => {
             >
               <Controls />
               <Background color="#aaa" gap={16} />
+              
+              {/* Custom Process Controls */}
+              <ProcessControls 
+                onZoomIn={() => {}} 
+                onZoomOut={() => {}} 
+                onFitView={() => {}} 
+                onClear={() => {
+                  setNodes([]);
+                  setEdges([]);
+                  toast.info('Canvas cleared');
+                }} 
+              />
             </ReactFlow>
           </ReactFlowProvider>
+        </div>
+        
+        {/* Process Legend */}
+        <div className="sidebar-right p-4 bg-white border-l border-gray-200">
+          <ProcessLegend />
+          
+          {/* Execution Status */}
+          {(isExecuting || executionStatus) && (
+            <div className="execution-status mt-4">
+              <h3 className="text-lg font-semibold mb-2">Execution Status</h3>
+              
+              <div className="status-indicator flex items-center mb-2">
+                <div 
+                  className="w-3 h-3 rounded-full mr-2" 
+                  style={{ 
+                    backgroundColor: executionStatus ? 
+                      (executionStatus.status === 'COMPLETED' ? '#10b981' : 
+                       executionStatus.status === 'FAILED' ? '#ef4444' : 
+                       executionStatus.status === 'RUNNING' ? '#3b82f6' : '#f59e0b') 
+                      : '#f59e0b'
+                  }}
+                ></div>
+                <span className="font-medium">
+                  {executionStatus ? executionStatus.status : 'INITIALIZING'}
+                </span>
+              </div>
+              
+              {executionStatus && (
+                <div className="status-details text-sm">
+                  <div className="grid grid-cols-2 gap-1">
+                    {executionStatus.currentNodeId && (
+                      <>
+                        <div className="text-gray-600">Current Node:</div>
+                        <div>{executionStatus.currentNodeId}</div>
+                      </>
+                    )}
+                    
+                    {executionStatus.result && (
+                      <div className="col-span-2 mt-2 p-2 bg-gray-100 rounded text-xs">
+                        <pre>{JSON.stringify(executionStatus.result, null, 2)}</pre>
+                      </div>
+                    )}
+                    
+                    {executionStatus.error && (
+                      <div className="col-span-2 mt-2 text-red-600">
+                        Error: {executionStatus.error}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
