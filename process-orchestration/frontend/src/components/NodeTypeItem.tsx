@@ -18,7 +18,12 @@ const NodeTypeItem: React.FC<NodeTypeItemProps> = ({
   return (
     <div
       className="p-3 rounded-md cursor-move transition-all hover:shadow-md mb-2"
-      style={{ backgroundColor: color, color: 'white' }}
+      style={{ 
+        backgroundColor: color, 
+        color: 'white',
+        border: '1px solid rgba(0,0,0,0.1)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+      }}
       draggable
       onDragStart={(e) => onDragStart(e, type)}
     >
