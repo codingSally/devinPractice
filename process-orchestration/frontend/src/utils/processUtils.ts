@@ -21,6 +21,26 @@ export const NODE_TYPE_DEFINITIONS = {
     label: 'Conditional Node', 
     description: 'Add conditional logic',
     color: '#9C27B0' 
+  },
+  'math.addition': {
+    label: 'Addition Node',
+    description: 'Perform addition operation',
+    color: '#E91E63'
+  },
+  'math.subtraction': {
+    label: 'Subtraction Node',
+    description: 'Perform subtraction operation',
+    color: '#673AB7'
+  },
+  'math.multiplication': {
+    label: 'Multiplication Node',
+    description: 'Perform multiplication operation',
+    color: '#00BCD4'
+  },
+  'math.division': {
+    label: 'Division Node',
+    description: 'Perform division operation',
+    color: '#FF5722'
   }
 };
 
@@ -42,6 +62,22 @@ const DEFAULT_PROPERTIES = {
   conditional: {
     condition: 'value == true',
     evaluationType: 'expression'
+  },
+  'math.addition': {
+    leftOperand: '0',
+    rightOperand: '0'
+  },
+  'math.subtraction': {
+    leftOperand: '0',
+    rightOperand: '0'
+  },
+  'math.multiplication': {
+    leftOperand: '0',
+    rightOperand: '0'
+  },
+  'math.division': {
+    leftOperand: '0',
+    rightOperand: '1'
   }
 };
 
