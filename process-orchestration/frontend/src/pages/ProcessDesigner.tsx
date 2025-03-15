@@ -376,66 +376,99 @@ const createComplexProcess = (): { nodes: Node[], edges: Edge[] } => {
   };
 };
 
-// Mathematical Process Example: 10 * (1*3 + 2*3 + 3*5 + 4*6) / 2
+// Mathematical Process Example: 10 * (1*3 + 2*3 + 3*5 + 4*6 + 5*7 + 6*8) / 2
 const createMathProcess = (): { nodes: Node[], edges: Edge[] } => {
   // Create nodes for the three-layer structure
   
   // Layer 3: Individual multiplication operations
-  const mult1 = createNode('math.multiplication', { x: 100, y: 100 });
+  const mult1 = createNode('math.multiplication', { x: 50, y: 100 });
   mult1.data.label = '1 × 3';
   (mult1.data.properties as any).leftOperand = '1';
   (mult1.data.properties as any).rightOperand = '3';
   (mult1.data.properties as any).result = '3';
   
-  const mult2 = createNode('math.multiplication', { x: 250, y: 100 });
+  const mult2 = createNode('math.multiplication', { x: 150, y: 100 });
   mult2.data.label = '2 × 3';
   (mult2.data.properties as any).leftOperand = '2';
   (mult2.data.properties as any).rightOperand = '3';
   (mult2.data.properties as any).result = '6';
   
-  const mult3 = createNode('math.multiplication', { x: 400, y: 100 });
+  const mult3 = createNode('math.multiplication', { x: 250, y: 100 });
   mult3.data.label = '3 × 5';
   (mult3.data.properties as any).leftOperand = '3';
   (mult3.data.properties as any).rightOperand = '5';
   (mult3.data.properties as any).result = '15';
   
-  const mult4 = createNode('math.multiplication', { x: 550, y: 100 });
+  const mult4 = createNode('math.multiplication', { x: 350, y: 100 });
   mult4.data.label = '4 × 6';
   (mult4.data.properties as any).leftOperand = '4';
   (mult4.data.properties as any).rightOperand = '6';
   (mult4.data.properties as any).result = '24';
   
-  // Layer 2: Addition operations
-  const add1 = createNode('math.addition', { x: 175, y: 200 });
+  const mult5 = createNode('math.multiplication', { x: 450, y: 100 });
+  mult5.data.label = '5 × 7';
+  (mult5.data.properties as any).leftOperand = '5';
+  (mult5.data.properties as any).rightOperand = '7';
+  (mult5.data.properties as any).result = '35';
+  
+  const mult6 = createNode('math.multiplication', { x: 550, y: 100 });
+  mult6.data.label = '6 × 8';
+  (mult6.data.properties as any).leftOperand = '6';
+  (mult6.data.properties as any).rightOperand = '8';
+  (mult6.data.properties as any).result = '48';
+  
+  // Layer 2: Addition operations (parallel processing)
+  const add1 = createNode('math.addition', { x: 100, y: 200 });
   add1.data.label = '3 + 6';
   (add1.data.properties as any).leftNodeResult = mult1.id;
   (add1.data.properties as any).rightNodeResult = mult2.id;
   (add1.data.properties as any).result = '9';
   
-  const add2 = createNode('math.addition', { x: 475, y: 200 });
+  const add2 = createNode('math.addition', { x: 300, y: 200 });
   add2.data.label = '15 + 24';
   (add2.data.properties as any).leftNodeResult = mult3.id;
   (add2.data.properties as any).rightNodeResult = mult4.id;
   (add2.data.properties as any).result = '39';
   
-  const addFinal = createNode('math.addition', { x: 325, y: 300 });
-  addFinal.data.label = '9 + 39';
-  (addFinal.data.properties as any).leftNodeResult = add1.id;
-  (addFinal.data.properties as any).rightNodeResult = add2.id;
-  (addFinal.data.properties as any).result = '48';
+  const add3 = createNode('math.addition', { x: 500, y: 200 });
+  add3.data.label = '35 + 48';
+  (add3.data.properties as any).leftNodeResult = mult5.id;
+  (add3.data.properties as any).rightNodeResult = mult6.id;
+  (add3.data.properties as any).result = '83';
+  
+  // Layer 2: More parallel operations
+  const sub1 = createNode('math.subtraction', { x: 200, y: 250 });
+  sub1.data.label = '39 - 9';
+  (sub1.data.properties as any).leftNodeResult = add2.id;
+  (sub1.data.properties as any).rightNodeResult = add1.id;
+  (sub1.data.properties as any).result = '30';
+  
+  const mult7 = createNode('math.multiplication', { x: 400, y: 250 });
+  mult7.data.label = '9 × 2';
+  (mult7.data.properties as any).leftNodeResult = add1.id;
+  (mult7.data.properties as any).rightOperand = '2';
+  (mult7.data.properties as any).result = '18';
+  
+  // Layer 2: Final addition before proceeding to next layer
+  const addFinal = createNode('math.addition', { x: 300, y: 350 });
+  addFinal.data.label = '30 + 83 + 18';
+  (addFinal.data.properties as any).leftNodeResult = sub1.id;
+  (addFinal.data.properties as any).rightNodeResult = add3.id;
+  (addFinal.data.properties as any).additionalNodeResult = mult7.id;
+  (addFinal.data.properties as any).result = '131';
   
   // Layer 1: Multiplication and division operations
-  const mult5 = createNode('math.multiplication', { x: 250, y: 400 });
-  mult5.data.label = '10 × 48';
-  (mult5.data.properties as any).leftOperand = '10';
-  (mult5.data.properties as any).rightNodeResult = addFinal.id;
-  (mult5.data.properties as any).result = '480';
+  const mult8 = createNode('math.multiplication', { x: 250, y: 450 });
+  mult8.data.label = '10 × 131';
+  (mult8.data.properties as any).leftOperand = '10';
+  (mult8.data.properties as any).rightNodeResult = addFinal.id;
+  (mult8.data.properties as any).result = '1310';
   
-  const div1 = createNode('math.division', { x: 400, y: 500 });
-  div1.data.label = '480 ÷ 2';
-  (div1.data.properties as any).leftNodeResult = mult5.id;
+  const div1 = createNode('math.division', { x: 400, y: 550 });
+  div1.data.label = '1310 ÷ 2';
+  (div1.data.properties as any).leftNodeResult = mult8.id;
   (div1.data.properties as any).rightOperand = '2';
-  (div1.data.properties as any).result = '240';
+  (div1.data.properties as any).result = '655';
   
   // Create edges
   const edges: Edge[] = [
@@ -484,53 +517,121 @@ const createMathProcess = (): { nodes: Node[], edges: Edge[] } => {
       labelStyle: { fill: '#E91E63', fontWeight: 'bold' },
       labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
     },
-    
-    // Layer 2 to Layer 2
     {
-      id: `${add1.id}-${addFinal.id}`,
-      source: add1.id,
-      target: addFinal.id,
+      id: `${mult5.id}-${add3.id}`,
+      source: mult5.id,
+      target: add3.id,
       type: 'smoothstep',
       animated: true,
       style: { stroke: '#555' },
-      label: '9',
+      label: '35',
       labelStyle: { fill: '#E91E63', fontWeight: 'bold' },
       labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
     },
     {
-      id: `${add2.id}-${addFinal.id}`,
+      id: `${mult6.id}-${add3.id}`,
+      source: mult6.id,
+      target: add3.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+      label: '48',
+      labelStyle: { fill: '#E91E63', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
+    },
+    
+    // Layer 2 parallel operations
+    {
+      id: `${add1.id}-${sub1.id}`,
+      source: add1.id,
+      target: sub1.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+      label: '9',
+      labelStyle: { fill: '#673AB7', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
+    },
+    {
+      id: `${add2.id}-${sub1.id}`,
       source: add2.id,
-      target: addFinal.id,
+      target: sub1.id,
       type: 'smoothstep',
       animated: true,
       style: { stroke: '#555' },
       label: '39',
+      labelStyle: { fill: '#673AB7', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
+    },
+    {
+      id: `${add1.id}-${mult7.id}`,
+      source: add1.id,
+      target: mult7.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+      label: '9',
+      labelStyle: { fill: '#00BCD4', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
+    },
+    
+    // Layer 2 to final addition
+    {
+      id: `${sub1.id}-${addFinal.id}`,
+      source: sub1.id,
+      target: addFinal.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+      label: '30',
+      labelStyle: { fill: '#E91E63', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
+    },
+    {
+      id: `${add3.id}-${addFinal.id}`,
+      source: add3.id,
+      target: addFinal.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+      label: '83',
+      labelStyle: { fill: '#E91E63', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
+    },
+    {
+      id: `${mult7.id}-${addFinal.id}`,
+      source: mult7.id,
+      target: addFinal.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+      label: '18',
       labelStyle: { fill: '#E91E63', fontWeight: 'bold' },
       labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
     },
     
     // Layer 2 to Layer 1
     {
-      id: `${addFinal.id}-${mult5.id}`,
+      id: `${addFinal.id}-${mult8.id}`,
       source: addFinal.id,
-      target: mult5.id,
+      target: mult8.id,
       type: 'smoothstep',
       animated: true,
       style: { stroke: '#555' },
-      label: '48',
+      label: '131',
       labelStyle: { fill: '#00BCD4', fontWeight: 'bold' },
       labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
     },
     
     // Layer 1 to Layer 1
     {
-      id: `${mult5.id}-${div1.id}`,
-      source: mult5.id,
+      id: `${mult8.id}-${div1.id}`,
+      source: mult8.id,
       target: div1.id,
       type: 'smoothstep',
       animated: true,
       style: { stroke: '#555' },
-      label: '480',
+      label: '1310',
       labelStyle: { fill: '#FF5722', fontWeight: 'bold' },
       labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
     }
@@ -538,9 +639,9 @@ const createMathProcess = (): { nodes: Node[], edges: Edge[] } => {
   
   return {
     nodes: [
-      mult1, mult2, mult3, mult4,
-      add1, add2, addFinal,
-      mult5, div1
+      mult1, mult2, mult3, mult4, mult5, mult6,
+      add1, add2, add3, sub1, mult7, addFinal,
+      mult8, div1
     ],
     edges
   };
