@@ -382,34 +382,60 @@ const createMathProcess = (): { nodes: Node[], edges: Edge[] } => {
   
   // Layer 3: Individual multiplication operations
   const mult1 = createNode('math.multiplication', { x: 100, y: 100 });
+  mult1.data.label = '1 × 3';
   (mult1.data.properties as any).leftOperand = '1';
   (mult1.data.properties as any).rightOperand = '3';
+  (mult1.data.properties as any).result = '3';
   
   const mult2 = createNode('math.multiplication', { x: 250, y: 100 });
+  mult2.data.label = '2 × 3';
   (mult2.data.properties as any).leftOperand = '2';
   (mult2.data.properties as any).rightOperand = '3';
+  (mult2.data.properties as any).result = '6';
   
   const mult3 = createNode('math.multiplication', { x: 400, y: 100 });
+  mult3.data.label = '3 × 5';
   (mult3.data.properties as any).leftOperand = '3';
   (mult3.data.properties as any).rightOperand = '5';
+  (mult3.data.properties as any).result = '15';
   
   const mult4 = createNode('math.multiplication', { x: 550, y: 100 });
+  mult4.data.label = '4 × 6';
   (mult4.data.properties as any).leftOperand = '4';
   (mult4.data.properties as any).rightOperand = '6';
+  (mult4.data.properties as any).result = '24';
   
   // Layer 2: Addition operations
   const add1 = createNode('math.addition', { x: 175, y: 200 });
+  add1.data.label = '3 + 6';
+  (add1.data.properties as any).leftNodeResult = mult1.id;
+  (add1.data.properties as any).rightNodeResult = mult2.id;
+  (add1.data.properties as any).result = '9';
   
   const add2 = createNode('math.addition', { x: 475, y: 200 });
+  add2.data.label = '15 + 24';
+  (add2.data.properties as any).leftNodeResult = mult3.id;
+  (add2.data.properties as any).rightNodeResult = mult4.id;
+  (add2.data.properties as any).result = '39';
   
   const addFinal = createNode('math.addition', { x: 325, y: 300 });
+  addFinal.data.label = '9 + 39';
+  (addFinal.data.properties as any).leftNodeResult = add1.id;
+  (addFinal.data.properties as any).rightNodeResult = add2.id;
+  (addFinal.data.properties as any).result = '48';
   
   // Layer 1: Multiplication and division operations
   const mult5 = createNode('math.multiplication', { x: 250, y: 400 });
+  mult5.data.label = '10 × 48';
   (mult5.data.properties as any).leftOperand = '10';
+  (mult5.data.properties as any).rightNodeResult = addFinal.id;
+  (mult5.data.properties as any).result = '480';
   
   const div1 = createNode('math.division', { x: 400, y: 500 });
+  div1.data.label = '480 ÷ 2';
+  (div1.data.properties as any).leftNodeResult = mult5.id;
   (div1.data.properties as any).rightOperand = '2';
+  (div1.data.properties as any).result = '240';
   
   // Create edges
   const edges: Edge[] = [
@@ -421,6 +447,9 @@ const createMathProcess = (): { nodes: Node[], edges: Edge[] } => {
       type: 'smoothstep',
       animated: true,
       style: { stroke: '#555' },
+      label: '3',
+      labelStyle: { fill: '#E91E63', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
     },
     {
       id: `${mult2.id}-${add1.id}`,
@@ -429,6 +458,9 @@ const createMathProcess = (): { nodes: Node[], edges: Edge[] } => {
       type: 'smoothstep',
       animated: true,
       style: { stroke: '#555' },
+      label: '6',
+      labelStyle: { fill: '#E91E63', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
     },
     {
       id: `${mult3.id}-${add2.id}`,
@@ -437,6 +469,9 @@ const createMathProcess = (): { nodes: Node[], edges: Edge[] } => {
       type: 'smoothstep',
       animated: true,
       style: { stroke: '#555' },
+      label: '15',
+      labelStyle: { fill: '#E91E63', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
     },
     {
       id: `${mult4.id}-${add2.id}`,
@@ -445,6 +480,9 @@ const createMathProcess = (): { nodes: Node[], edges: Edge[] } => {
       type: 'smoothstep',
       animated: true,
       style: { stroke: '#555' },
+      label: '24',
+      labelStyle: { fill: '#E91E63', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
     },
     
     // Layer 2 to Layer 2
@@ -455,6 +493,9 @@ const createMathProcess = (): { nodes: Node[], edges: Edge[] } => {
       type: 'smoothstep',
       animated: true,
       style: { stroke: '#555' },
+      label: '9',
+      labelStyle: { fill: '#E91E63', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
     },
     {
       id: `${add2.id}-${addFinal.id}`,
@@ -463,6 +504,9 @@ const createMathProcess = (): { nodes: Node[], edges: Edge[] } => {
       type: 'smoothstep',
       animated: true,
       style: { stroke: '#555' },
+      label: '39',
+      labelStyle: { fill: '#E91E63', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
     },
     
     // Layer 2 to Layer 1
@@ -473,6 +517,9 @@ const createMathProcess = (): { nodes: Node[], edges: Edge[] } => {
       type: 'smoothstep',
       animated: true,
       style: { stroke: '#555' },
+      label: '48',
+      labelStyle: { fill: '#00BCD4', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
     },
     
     // Layer 1 to Layer 1
@@ -483,6 +530,9 @@ const createMathProcess = (): { nodes: Node[], edges: Edge[] } => {
       type: 'smoothstep',
       animated: true,
       style: { stroke: '#555' },
+      label: '480',
+      labelStyle: { fill: '#FF5722', fontWeight: 'bold' },
+      labelBgStyle: { fill: 'rgba(255, 255, 255, 0.75)', fillOpacity: 0.8 }
     }
   ];
   
@@ -502,6 +552,10 @@ const nodeTypes = {
   http: CustomNode,
   script: CustomNode,
   conditional: CustomNode,
+  'math.addition': CustomNode,
+  'math.subtraction': CustomNode,
+  'math.multiplication': CustomNode,
+  'math.division': CustomNode,
 };
 
 const ProcessDesigner: React.FC<{}> = () => {
@@ -846,24 +900,49 @@ const ProcessDesigner: React.FC<{}> = () => {
             Create Example Process
           </button>
           {selectedProcessType === 'math' && (
-            <button
-              className="w-full mt-2 px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors"
-              onClick={async () => {
-                try {
-                  const response = await createMathExample();
-                  setExecutionStatus({
-                    status: 'COMPLETED',
-                    result: response.data
-                  });
-                  toast.success('Math example executed successfully!');
-                } catch (error) {
-                  console.error('Failed to execute math example:', error);
-                  toast.error('Failed to execute math example');
-                }
-              }}
-            >
-              Verify Math Calculation
-            </button>
+            <>
+              <div className="mt-2 p-3 bg-gray-100 rounded-md border border-gray-300">
+                <h3 className="font-bold text-gray-700 mb-2">How to Use Math Nodes:</h3>
+                <ol className="list-decimal pl-5 text-sm">
+                  <li className="mb-1">Select "Mathematical Process" from the dropdown</li>
+                  <li className="mb-1">Click "Create Example Process" to see the example</li>
+                  <li className="mb-1">The example calculates: 10 * (1*3 + 2*3 + 3*5 + 4*6) / 2</li>
+                  <li className="mb-1">Click on any node to see its properties</li>
+                  <li className="mb-1">Click "Verify Math Calculation" to execute and see the result</li>
+                </ol>
+                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
+                  <p><strong>Expected Result:</strong> 240</p>
+                  <p><strong>Explanation:</strong></p>
+                  <ul className="list-disc pl-4">
+                    <li>Layer 3: 1*3=3, 2*3=6, 3*5=15, 4*6=24</li>
+                    <li>Layer 2: 3+6=9, 15+24=39, 9+39=48</li>
+                    <li>Layer 1: 10*48=480, 480/2=240</li>
+                  </ul>
+                </div>
+              </div>
+              <button
+                className="w-full mt-2 px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors"
+                onClick={async () => {
+                  try {
+                    const response = await createMathExample();
+                    setExecutionStatus({
+                      status: 'COMPLETED',
+                      result: response.data
+                    });
+                    toast.success('Math example executed successfully!');
+                  } catch (error) {
+                    console.error('Failed to execute math example:', error);
+                    setExecutionStatus({
+                      status: 'FAILED',
+                      error: 'Backend server connection error. Please ensure the backend is running.'
+                    });
+                    toast.error('Failed to execute math example. Please make sure the backend server is running.');
+                  }
+                }}
+              >
+                Verify Math Calculation
+              </button>
+            </>
           )}
         </div>
         
