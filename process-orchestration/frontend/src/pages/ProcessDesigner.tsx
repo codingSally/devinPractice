@@ -10,12 +10,371 @@ import ReactFlow, {
   Connection,
   MarkerType,
   Node,
+  Edge
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { createProcessDefinition, executeProcess, getProcessExecutionStatus } from '../services/api';
 import { createNode, convertToProcessDefinition, NODE_TYPE_DEFINITIONS } from '../utils/processUtils';
 import CustomNode from '../components/CustomNode';
 import NodeTypeItem from '../components/NodeTypeItem';
+import ProcessLegend from '../components/ProcessLegend';
+import ProcessControls from '../components/ProcessControls';
+
+// Define test process configurations
+const createSequentialProcess = (): { nodes: Node[], edges: Edge[] } => {
+  // Create nodes
+  const startNode = createNode('logging', { x: 250, y: 100 });
+  (startNode.data.properties as any).message = 'Starting sequential process';
+  
+  const httpNode = createNode('http', { x: 250, y: 250 });
+  (httpNode.data.properties as any).url = 'https://api.example.com/data';
+  (httpNode.data.properties as any).method = 'GET';
+  
+  const scriptNode = createNode('script', { x: 250, y: 400 });
+  (scriptNode.data.properties as any).script = 'console.log("Processing data from API");';
+  
+  const endNode = createNode('logging', { x: 250, y: 550 });
+  (endNode.data.properties as any).message = 'Sequential process completed';
+  
+  // Create edges
+  const edges: Edge[] = [
+    {
+      id: `${startNode.id}-${httpNode.id}`,
+      source: startNode.id,
+      target: httpNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${httpNode.id}-${scriptNode.id}`,
+      source: httpNode.id,
+      target: scriptNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${scriptNode.id}-${endNode.id}`,
+      source: scriptNode.id,
+      target: endNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    }
+  ];
+  
+  return {
+    nodes: [startNode, httpNode, scriptNode, endNode],
+    edges
+  };
+};
+
+// Parallel Process with Join
+const createParallelProcess = (): { nodes: Node[], edges: Edge[] } => {
+  // Create nodes
+  const startNode = createNode('logging', { x: 250, y: 100 });
+  (startNode.data.properties as any).message = 'Starting parallel process';
+  
+  const httpNode1 = createNode('http', { x: 100, y: 250 });
+  (httpNode1.data.properties as any).url = 'https://api.example.com/users';
+  (httpNode1.data.properties as any).method = 'GET';
+  
+  const httpNode2 = createNode('http', { x: 400, y: 250 });
+  (httpNode2.data.properties as any).url = 'https://api.example.com/products';
+  (httpNode2.data.properties as any).method = 'GET';
+  
+  const scriptNode = createNode('script', { x: 250, y: 400 });
+  (scriptNode.data.properties as any).script = 'console.log("Combining data from parallel requests");';
+  
+  const endNode = createNode('logging', { x: 250, y: 550 });
+  (endNode.data.properties as any).message = 'Parallel process completed';
+  
+  // Create edges
+  const edges: Edge[] = [
+    {
+      id: `${startNode.id}-${httpNode1.id}`,
+      source: startNode.id,
+      target: httpNode1.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#2979FF', strokeDasharray: '5,5' },
+    },
+    {
+      id: `${startNode.id}-${httpNode2.id}`,
+      source: startNode.id,
+      target: httpNode2.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#2979FF', strokeDasharray: '5,5' },
+    },
+    {
+      id: `${httpNode1.id}-${scriptNode.id}`,
+      source: httpNode1.id,
+      target: scriptNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${httpNode2.id}-${scriptNode.id}`,
+      source: httpNode2.id,
+      target: scriptNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${scriptNode.id}-${endNode.id}`,
+      source: scriptNode.id,
+      target: endNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    }
+  ];
+  
+  return {
+    nodes: [startNode, httpNode1, httpNode2, scriptNode, endNode],
+    edges
+  };
+};
+
+// Conditional Process with Branching
+const createConditionalProcess = (): { nodes: Node[], edges: Edge[] } => {
+  // Create nodes
+  const startNode = createNode('logging', { x: 250, y: 100 });
+  (startNode.data.properties as any).message = 'Starting conditional process';
+  
+  const conditionalNode = createNode('conditional', { x: 250, y: 250 });
+  (conditionalNode.data.properties as any).condition = 'data.status === "success"';
+  
+  const successNode = createNode('script', { x: 100, y: 400 });
+  (successNode.data.properties as any).script = 'console.log("Processing successful response");';
+  
+  const failureNode = createNode('script', { x: 400, y: 400 });
+  (failureNode.data.properties as any).script = 'console.log("Handling error response");';
+  
+  const endNode = createNode('logging', { x: 250, y: 550 });
+  (endNode.data.properties as any).message = 'Conditional process completed';
+  
+  // Create edges
+  const edges: Edge[] = [
+    {
+      id: `${startNode.id}-${conditionalNode.id}`,
+      source: startNode.id,
+      target: conditionalNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${conditionalNode.id}-${successNode.id}`,
+      source: conditionalNode.id,
+      target: successNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#2979FF', strokeDasharray: '5,5' },
+      label: 'True'
+    },
+    {
+      id: `${conditionalNode.id}-${failureNode.id}`,
+      source: conditionalNode.id,
+      target: failureNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#2979FF', strokeDasharray: '5,5' },
+      label: 'False'
+    },
+    {
+      id: `${successNode.id}-${endNode.id}`,
+      source: successNode.id,
+      target: endNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${failureNode.id}-${endNode.id}`,
+      source: failureNode.id,
+      target: endNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    }
+  ];
+  
+  return {
+    nodes: [startNode, conditionalNode, successNode, failureNode, endNode],
+    edges
+  };
+};
+
+// Complex Multi-Level Process
+const createComplexProcess = (): { nodes: Node[], edges: Edge[] } => {
+  // Create nodes
+  const startNode = createNode('logging', { x: 250, y: 50 });
+  (startNode.data.properties as any).message = 'Starting complex process';
+  
+  // Level 1 - Parallel HTTP requests
+  const httpNode1 = createNode('http', { x: 100, y: 150 });
+  (httpNode1.data.properties as any).url = 'https://api.example.com/users';
+  (httpNode1.data.properties as any).method = 'GET';
+  
+  const httpNode2 = createNode('http', { x: 400, y: 150 });
+  (httpNode2.data.properties as any).url = 'https://api.example.com/products';
+  (httpNode2.data.properties as any).method = 'GET';
+  
+  // Level 2 - Process data
+  const scriptNode1 = createNode('script', { x: 100, y: 250 });
+  (scriptNode1.data.properties as any).script = 'console.log("Processing user data");';
+  
+  const scriptNode2 = createNode('script', { x: 400, y: 250 });
+  (scriptNode2.data.properties as any).script = 'console.log("Processing product data");';
+  
+  // Level 3 - Conditional check
+  const conditionalNode = createNode('conditional', { x: 250, y: 350 });
+  (conditionalNode.data.properties as any).condition = 'data.users.length > 0 && data.products.length > 0';
+  
+  // Level 4 - Parallel processing based on condition
+  const successNode1 = createNode('script', { x: 100, y: 450 });
+  (successNode1.data.properties as any).script = 'console.log("Generating user report");';
+  
+  const successNode2 = createNode('script', { x: 400, y: 450 });
+  (successNode2.data.properties as any).script = 'console.log("Generating product report");';
+  
+  const failureNode = createNode('logging', { x: 250, y: 450 });
+  (failureNode.data.properties as any).message = 'No data available for processing';
+  (failureNode.data.properties as any).level = 'WARN';
+  
+  // Level 5 - Final processing
+  const endNode = createNode('logging', { x: 250, y: 550 });
+  (endNode.data.properties as any).message = 'Complex process completed';
+  
+  // Create edges
+  const edges: Edge[] = [
+    // Level 0 to Level 1
+    {
+      id: `${startNode.id}-${httpNode1.id}`,
+      source: startNode.id,
+      target: httpNode1.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#2979FF', strokeDasharray: '5,5' },
+    },
+    {
+      id: `${startNode.id}-${httpNode2.id}`,
+      source: startNode.id,
+      target: httpNode2.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#2979FF', strokeDasharray: '5,5' },
+    },
+    
+    // Level 1 to Level 2
+    {
+      id: `${httpNode1.id}-${scriptNode1.id}`,
+      source: httpNode1.id,
+      target: scriptNode1.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${httpNode2.id}-${scriptNode2.id}`,
+      source: httpNode2.id,
+      target: scriptNode2.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    
+    // Level 2 to Level 3
+    {
+      id: `${scriptNode1.id}-${conditionalNode.id}`,
+      source: scriptNode1.id,
+      target: conditionalNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${scriptNode2.id}-${conditionalNode.id}`,
+      source: scriptNode2.id,
+      target: conditionalNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    
+    // Level 3 to Level 4
+    {
+      id: `${conditionalNode.id}-${successNode1.id}`,
+      source: conditionalNode.id,
+      target: successNode1.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#2979FF', strokeDasharray: '5,5' },
+      label: 'True'
+    },
+    {
+      id: `${conditionalNode.id}-${successNode2.id}`,
+      source: conditionalNode.id,
+      target: successNode2.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#2979FF', strokeDasharray: '5,5' },
+      label: 'True'
+    },
+    {
+      id: `${conditionalNode.id}-${failureNode.id}`,
+      source: conditionalNode.id,
+      target: failureNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+      label: 'False'
+    },
+    
+    // Level 4 to Level 5
+    {
+      id: `${successNode1.id}-${endNode.id}`,
+      source: successNode1.id,
+      target: endNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${successNode2.id}-${endNode.id}`,
+      source: successNode2.id,
+      target: endNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${failureNode.id}-${endNode.id}`,
+      source: failureNode.id,
+      target: endNode.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    }
+  ];
+  
+  return {
+    nodes: [
+      startNode, 
+      httpNode1, httpNode2, 
+      scriptNode1, scriptNode2, 
+      conditionalNode, 
+      successNode1, successNode2, failureNode, 
+      endNode
+    ],
+    edges
+  };
+};
 
 // Define node types for ReactFlow
 const nodeTypes = {
@@ -25,7 +384,7 @@ const nodeTypes = {
   conditional: CustomNode,
 };
 
-const ProcessDesigner: React.FC = () => {
+const ProcessDesigner: React.FC<{}> = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -34,6 +393,10 @@ const ProcessDesigner: React.FC = () => {
   const [processDescription, setProcessDescription] = useState('Process description');
   const [currentProcessId, setCurrentProcessId] = useState<number | null>(null);
   const [executing, setExecuting] = useState(false);
+  const [selectedProcessType, setSelectedProcessType] = useState('sequential');
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [executionStatus, setExecutionStatus] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Handle connections between nodes
   const onConnect = useCallback(
@@ -98,10 +461,7 @@ const ProcessDesigner: React.FC = () => {
     event.dataTransfer.effectAllowed = 'move';
   };
 
-  // State for execution status display
-  const [executionStatus, setExecutionStatus] = useState<any>(null);
-  const [isExecuting, setIsExecuting] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  // Save process definition
 
   // Save process definition
   const handleSaveProcess = async () => {
@@ -156,9 +516,9 @@ const ProcessDesigner: React.FC = () => {
       return;
     }
 
+    setExecuting(true);
     setIsExecuting(true);
     setExecutionStatus(null);
-    
     try {
       try {
         const response = await executeProcess(processId);
@@ -180,6 +540,8 @@ const ProcessDesigner: React.FC = () => {
       console.error('Failed to execute process:', error);
       toast.error('Failed to execute process. Please try again.');
       setIsExecuting(false);
+    } finally {
+      setExecuting(false);
     }
   };
   
@@ -275,74 +637,35 @@ const ProcessDesigner: React.FC = () => {
 
   // Add example nodes for testing
   const addExampleProcess = () => {
-    const loggingNode = createNode('logging', { x: 250, y: 100 });
-    const httpNode = createNode('http', { x: 250, y: 250 });
-    const scriptNode = createNode('script', { x: 450, y: 250 });
-    const conditionalNode = createNode('conditional', { x: 250, y: 400 });
+    let processConfig;
     
-    setNodes([loggingNode, httpNode, scriptNode, conditionalNode]);
+    // Select process configuration based on type
+    switch (selectedProcessType) {
+      case 'sequential':
+        processConfig = createSequentialProcess();
+        break;
+      case 'parallel':
+        processConfig = createParallelProcess();
+        break;
+      case 'conditional':
+        processConfig = createConditionalProcess();
+        break;
+      case 'complex':
+        processConfig = createComplexProcess();
+        break;
+      default:
+        processConfig = createSequentialProcess();
+    }
     
-    const newEdges = [
-      {
-        id: `${loggingNode.id}-${httpNode.id}`,
-        source: loggingNode.id,
-        target: httpNode.id,
-        type: 'smoothstep',
-        animated: true,
-        style: { stroke: '#555' },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 20,
-          height: 20,
-          color: '#555',
-        },
-      },
-      {
-        id: `${loggingNode.id}-${scriptNode.id}`,
-        source: loggingNode.id,
-        target: scriptNode.id,
-        type: 'smoothstep',
-        animated: true,
-        style: { stroke: '#555' },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 20,
-          height: 20,
-          color: '#555',
-        },
-      },
-      {
-        id: `${httpNode.id}-${conditionalNode.id}`,
-        source: httpNode.id,
-        target: conditionalNode.id,
-        type: 'smoothstep',
-        animated: true,
-        style: { stroke: '#555' },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 20,
-          height: 20,
-          color: '#555',
-        },
-      },
-      {
-        id: `${scriptNode.id}-${conditionalNode.id}`,
-        source: scriptNode.id,
-        target: conditionalNode.id,
-        type: 'smoothstep',
-        animated: true,
-        style: { stroke: '#555' },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 20,
-          height: 20,
-          color: '#555',
-        },
-      },
-    ];
+    // Set nodes and edges
+    setNodes(processConfig.nodes);
+    setEdges(processConfig.edges);
     
-    setEdges(newEdges);
-    toast.info('Example process created');
+    // Update process name and description based on type
+    setProcessName(`${selectedProcessType.charAt(0).toUpperCase() + selectedProcessType.slice(1)} Process`);
+    setProcessDescription(`A ${selectedProcessType} process orchestration example demonstrating ${selectedProcessType} execution flow.`);
+    
+    toast.info(`${selectedProcessType.charAt(0).toUpperCase() + selectedProcessType.slice(1)} process created`);
   };
 
   return (
@@ -379,6 +702,19 @@ const ProcessDesigner: React.FC = () => {
           >
             {isExecuting ? 'Executing...' : 'Execute Process'}
           </button>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Process Type</label>
+            <select
+              value={selectedProcessType}
+              onChange={(e) => setSelectedProcessType(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="sequential">Sequential Process</option>
+              <option value="parallel">Parallel Process</option>
+              <option value="conditional">Conditional Process</option>
+              <option value="complex">Complex Multi-Level Process</option>
+            </select>
+          </div>
           <button
             className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
             onClick={addExampleProcess}
@@ -474,8 +810,73 @@ const ProcessDesigner: React.FC = () => {
             >
               <Controls />
               <Background color="#aaa" gap={16} />
+              
+              {/* Custom Process Controls */}
+              <ProcessControls 
+                onZoomIn={() => {}} 
+                onZoomOut={() => {}} 
+                onFitView={() => {}} 
+                onClear={() => {
+                  setNodes([]);
+                  setEdges([]);
+                  toast.info('Canvas cleared');
+                }} 
+              />
             </ReactFlow>
           </ReactFlowProvider>
+        </div>
+        
+        {/* Process Legend */}
+        <div className="sidebar-right p-4 bg-white border-l border-gray-200">
+          <ProcessLegend />
+          
+          {/* Execution Status */}
+          {(isExecuting || executionStatus) && (
+            <div className="execution-status mt-4">
+              <h3 className="text-lg font-semibold mb-2">Execution Status</h3>
+              
+              <div className="status-indicator flex items-center mb-2">
+                <div 
+                  className="w-3 h-3 rounded-full mr-2" 
+                  style={{ 
+                    backgroundColor: executionStatus ? 
+                      (executionStatus.status === 'COMPLETED' ? '#10b981' : 
+                       executionStatus.status === 'FAILED' ? '#ef4444' : 
+                       executionStatus.status === 'RUNNING' ? '#3b82f6' : '#f59e0b') 
+                      : '#f59e0b'
+                  }}
+                ></div>
+                <span className="font-medium">
+                  {executionStatus ? executionStatus.status : 'INITIALIZING'}
+                </span>
+              </div>
+              
+              {executionStatus && (
+                <div className="status-details text-sm">
+                  <div className="grid grid-cols-2 gap-1">
+                    {executionStatus.currentNodeId && (
+                      <>
+                        <div className="text-gray-600">Current Node:</div>
+                        <div>{executionStatus.currentNodeId}</div>
+                      </>
+                    )}
+                    
+                    {executionStatus.result && (
+                      <div className="col-span-2 mt-2 p-2 bg-gray-100 rounded text-xs">
+                        <pre>{JSON.stringify(executionStatus.result, null, 2)}</pre>
+                      </div>
+                    )}
+                    
+                    {executionStatus.error && (
+                      <div className="col-span-2 mt-2 text-red-600">
+                        Error: {executionStatus.error}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
