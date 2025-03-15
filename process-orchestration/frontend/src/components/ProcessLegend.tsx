@@ -38,6 +38,41 @@ const ProcessLegend: React.FC = () => {
           <span>Conditional Node</span>
         </div>
         
+        {/* Math Nodes Section */}
+        <div className="legend-section mt-4 mb-4">
+          <h4 className="font-semibold mb-2">Math Nodes</h4>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="legend-item flex items-center">
+              <div 
+                className="w-4 h-4 mr-2 rounded-full" 
+                style={{ backgroundColor: '#E91E63' }}
+              ></div>
+              <span>Addition (+)</span>
+            </div>
+            <div className="legend-item flex items-center">
+              <div 
+                className="w-4 h-4 mr-2 rounded-full" 
+                style={{ backgroundColor: '#673AB7' }}
+              ></div>
+              <span>Subtraction (-)</span>
+            </div>
+            <div className="legend-item flex items-center">
+              <div 
+                className="w-4 h-4 mr-2 rounded-full" 
+                style={{ backgroundColor: '#00BCD4' }}
+              ></div>
+              <span>Multiplication (×)</span>
+            </div>
+            <div className="legend-item flex items-center">
+              <div 
+                className="w-4 h-4 mr-2 rounded-full" 
+                style={{ backgroundColor: '#FF5722' }}
+              ></div>
+              <span>Division (÷)</span>
+            </div>
+          </div>
+        </div>
+        
         <div className="legend-item flex items-center mb-2">
           <div className="flex items-center">
             <div 
@@ -70,6 +105,7 @@ const ProcessLegend: React.FC = () => {
         <p className="mb-1">• Nodes at the same level execute in parallel</p>
         <p className="mb-1">• Execution proceeds to the next level only when all nodes at the current level complete</p>
         <p className="mb-1">• Conditional nodes can branch the execution flow</p>
+        <p className="mb-1">• Math nodes show operation values and results</p>
         <p>• Click on nodes to view/edit their properties</p>
       </div>
     </div>

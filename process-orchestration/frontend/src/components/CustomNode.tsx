@@ -34,6 +34,54 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, type }) => {
     }
   };
   
+  // Get operation symbol based on node type
+  const getOperationSymbol = () => {
+    switch (type) {
+      case 'math.addition':
+        return '+';
+      case 'math.subtraction':
+        return '-';
+      case 'math.multiplication':
+        return '×';
+      case 'math.division':
+        return '÷';
+      default:
+        return '';
+    }
+  };
+  
+  // Display values for math nodes
+  const renderMathNodeContent = () => {
+    if (!type.startsWith('math.')) return null;
+    
+    const leftValue = data.properties.leftOperand || data.properties.leftNodeResult || '?';
+    const rightValue = data.properties.rightOperand || data.properties.rightNodeResult || '?';
+    
+    return (
+      <div style={{ fontSize: '14px', marginTop: '2px', color: 'white' }}>
+        {leftValue} {getOperationSymbol()} {rightValue}
+      </div>
+    );
+  };
+  
+  // Get result value if available
+  const getResultValue = () => {
+    if (!type.startsWith('math.') || !data.properties.result) return null;
+    
+    return (
+      <div style={{ 
+        fontSize: '12px', 
+        marginTop: '4px', 
+        color: 'white', 
+        backgroundColor: 'rgba(0,0,0,0.2)', 
+        padding: '2px 6px', 
+        borderRadius: '10px' 
+      }}>
+        = {data.properties.result}
+      </div>
+    );
+  };
+  
   return (
     <div 
       className="node-container"
@@ -54,6 +102,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, type }) => {
           height: '80px',
           borderRadius: '50%',
           display: 'flex',
+          flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
@@ -67,6 +116,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, type }) => {
         <div style={{ textAlign: 'center', padding: '5px', fontSize: '12px', fontWeight: 'bold' }}>
           {data.label}
         </div>
+        {renderMathNodeContent()}
+        {getResultValue()}
       </div>
       
       {/* Handles */}
@@ -103,18 +154,36 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, type }) => {
             border: `2px solid ${getNodeColor()}`,
             borderRadius: '8px',
             padding: '10px',
-            width: '200px',
+            width: '220px',
             zIndex: 10,
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
           }}
         >
           <div style={{ fontWeight: 'bold', marginBottom: '5px', color: getNodeColor() }}>Properties:</div>
           {Object.entries(data.properties).map(([key, value]) => (
-            <div key={key} style={{ display: 'flex', marginBottom: '3px' }}>
+            <div key={key} style={{ display: 'flex', marginBottom: '3px', flexWrap: 'wrap' }}>
               <span style={{ fontWeight: 'bold', marginRight: '5px', color: '#333' }}>{key}:</span>
               <span style={{ color: '#666' }}>{value}</span>
             </div>
           ))}
+          
+          {type.startsWith('math.') && (
+            <div style={{ 
+              marginTop: '8px', 
+              padding: '5px', 
+              backgroundColor: '#f5f5f5', 
+              borderRadius: '4px',
+              fontSize: '12px'
+            }}>
+              <div style={{ fontWeight: 'bold', color: getNodeColor() }}>Operation:</div>
+              <div>{renderMathNodeContent()}</div>
+              {data.properties.result && (
+                <div style={{ marginTop: '4px' }}>
+                  <span style={{ fontWeight: 'bold' }}>Result:</span> {data.properties.result}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
