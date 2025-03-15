@@ -1,92 +1,94 @@
 <template>
-  <div class="product-list">
-    <h1 style="background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">Calligraphy Products</h1>
-    
-    <div class="filters">
-      <a-row :gutter="16">
-        <a-col :span="6">
-          <a-select
-            v-model:value="categoryFilter"
-            placeholder="Filter by Category"
-            style="width: 100%"
-            @change="applyFilters"
-          >
-            <a-select-option value="">All Categories</a-select-option>
-            <a-select-option value="brushes">Brushes</a-select-option>
-            <a-select-option value="ink">Ink</a-select-option>
-            <a-select-option value="paper">Paper</a-select-option>
-            <a-select-option value="calligraphy works">Calligraphy Works</a-select-option>
-          </a-select>
-        </a-col>
-        
-        <a-col :span="12">
-          <a-row :gutter="8">
-            <a-col :span="11">
-              <a-input-number
-                v-model:value="minPrice"
-                placeholder="Min Price"
-                style="width: 100%"
-                :min="0"
-              />
-            </a-col>
-            <a-col :span="2" style="text-align: center">-</a-col>
-            <a-col :span="11">
-              <a-input-number
-                v-model:value="maxPrice"
-                placeholder="Max Price"
-                style="width: 100%"
-                :min="0"
-              />
-            </a-col>
-          </a-row>
-        </a-col>
-        
-        <a-col :span="6">
-          <a-button type="primary" @click="applyFilters" style="background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%); border: none; box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3); border-radius: 18px;">Apply Filters</a-button>
-          <a-button style="margin-left: 8px" @click="resetFilters">Reset</a-button>
-        </a-col>
-      </a-row>
+  <div class="product-list-page">
+    <!-- Banner carousel (JD style) -->
+    <div class="banner-carousel">
+      <img src="../images/banner1.jpg" alt="Banner" class="banner-image" />
     </div>
     
-    <a-spin :spinning="loading">
-      <div v-if="products.length === 0 && !loading" class="empty-state">
-        <a-empty description="No products found" />
+    <!-- Filters section -->
+    <div class="filters-section">
+      <div class="container">
+        <div class="filters">
+          <a-row :gutter="16">
+            <a-col :span="6">
+              <a-select
+                v-model:value="categoryFilter"
+                placeholder="分类筛选"
+                style="width: 100%"
+                @change="applyFilters"
+              >
+                <a-select-option value="">全部分类</a-select-option>
+                <a-select-option value="brushes">毛笔</a-select-option>
+                <a-select-option value="ink">墨水</a-select-option>
+                <a-select-option value="paper">宣纸</a-select-option>
+                <a-select-option value="calligraphy works">书法作品</a-select-option>
+              </a-select>
+            </a-col>
+            
+            <a-col :span="12">
+              <a-row :gutter="8">
+                <a-col :span="11">
+                  <a-input-number
+                    v-model:value="minPrice"
+                    placeholder="最低价格"
+                    style="width: 100%"
+                    :min="0"
+                  />
+                </a-col>
+                <a-col :span="2" style="text-align: center">-</a-col>
+                <a-col :span="11">
+                  <a-input-number
+                    v-model:value="maxPrice"
+                    placeholder="最高价格"
+                    style="width: 100%"
+                    :min="0"
+                  />
+                </a-col>
+              </a-row>
+            </a-col>
+            
+            <a-col :span="6">
+              <a-button type="primary" @click="applyFilters">应用筛选</a-button>
+              <a-button style="margin-left: 8px" @click="resetFilters">重置</a-button>
+            </a-col>
+          </a-row>
+        </div>
       </div>
-      
-      <a-row :gutter="[16, 16]" v-else>
-        <a-col :xs="24" :sm="12" :md="8" :lg="6" v-for="product in products" :key="product.productId">
-          <a-card hoverable>
-            <template #cover>
-              <img
-                alt="product image"
-                :src="getCartoonImage(product.imagePath)"
-                style="height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;"
-              />
-            </template>
-            <a-card-meta :title="product.productName">
-              <template #description>
-                <div>
-                  <p>{{ truncateDescription(product.description) }}</p>
-                  <p class="price">${{ product.price }}</p>
-               <a-button type="primary" class="view-details-btn" @click="viewProductDetails(product.productId)">
-                    <span style="font-weight: 500;">View Details</span>
-                  </a-button>
-                </div>
-              </template>
-            </a-card-meta>
-          </a-card>
-        </a-col>
-      </a-row>
-      
-      <div class="pagination">
-        <a-pagination
-          v-model:current="currentPage"
-          :total="totalProducts"
-          :pageSize="pageSize"
-          @change="handlePageChange"
-        />
+    </div>
+    
+    <!-- Product grid (JD style) -->
+    <div class="product-grid-section">
+      <div class="container">
+        <a-spin :spinning="loading">
+          <div v-if="products.length === 0 && !loading" class="empty-state">
+            <a-empty description="没有找到相关产品" />
+          </div>
+          
+          <div class="product-grid" v-else>
+            <div class="product-item" v-for="product in products" :key="product.productId" @click="viewProductDetails(product.productId)">
+              <div class="product-image">
+                <img :src="getCartoonImage(product.imagePath)" :alt="product.productName" />
+              </div>
+              <div class="product-price">¥{{ product.price }}</div>
+              <div class="product-name">{{ product.productName }}</div>
+              <div class="product-shop">书法艺术自营</div>
+              <div class="product-actions">
+                <button class="add-to-cart-btn">加入购物车</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="pagination">
+            <a-pagination
+              v-model:current="currentPage"
+              :total="totalProducts"
+              :pageSize="pageSize"
+              @change="handlePageChange"
+            />
+          </div>
+        </a-spin>
       </div>
-    </a-spin>
+    </div>
   </div>
 </template>
 
@@ -189,104 +191,139 @@ export default {
 </script>
 
 <style scoped>
-.product-list {
-  padding: 20px 0;
-  animation: fadeIn 0.5s ease-out;
+.product-list-page {
+  background-color: var(--light-bg);
 }
 
-.filters {
-  margin-bottom: 24px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #1890ff;
-  animation: slideUp 0.5s ease-out;
+.banner-carousel {
+  width: 100%;
+  height: 340px;
+  overflow: hidden;
+  margin-bottom: 20px;
 }
 
-.price {
-  font-weight: bold;
-  color: #1890ff;
-  margin: 12px 0;
-  font-size: 20px;
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1), transparent);
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.pagination {
-  margin-top: 32px;
-  text-align: center;
-  padding: 16px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  animation: fadeIn 0.5s ease-out;
-}
-
-.empty-state {
-  margin: 48px 0;
-  text-align: center;
-  padding: 40px;
-  background: white;
-  border-radius: var(--border-radius);
+.filters-section {
+  background-color: white;
+  padding: 15px 0;
+  margin-bottom: 20px;
   box-shadow: var(--card-shadow);
 }
 
-/* Card styling */
-:deep(.ant-card) {
-  border-radius: 8px;
+.filters {
+  padding: 10px;
+}
+
+.product-grid-section {
+  margin-bottom: 30px;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+}
+
+.product-item {
+  background-color: white;
+  border-radius: var(--border-radius);
   overflow: hidden;
-  transition: all 0.3s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: none;
-  animation: slideUp 0.5s ease-out;
-  transform: translateY(0);
+  transition: all var(--transition-speed);
+  cursor: pointer;
+  padding: 10px;
+  position: relative;
 }
 
-:deep(.ant-card:hover) {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+.product-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--hover-shadow);
 }
 
-:deep(.ant-card-meta-title) {
-  font-size: 18px;
-  margin-bottom: 8px;
-  color: #333333;
-  font-weight: 600;
-}
-
-:deep(.ant-card-meta-description) {
-  color: rgba(0, 0, 0, 0.65);
-}
-
-.view-details-btn {
-  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%) !important;
-  border: none !important;
-  height: 36px;
-  border-radius: 18px !important;
-  padding: 0 20px !important;
-  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3) !important;
-  transition: all 0.3s !important;
+.product-image {
   width: 100%;
-  margin-top: 8px;
+  height: 200px;
+  overflow: hidden;
+  margin-bottom: 10px;
 }
 
-.view-details-btn:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.5) !important;
-  opacity: 0.9;
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
 }
 
-/* Gradient text styling */
-.gradient-text {
-  background: var(--primary-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-fill-color: transparent;
-  display: inline-block;
+.product-item:hover .product-image img {
+  transform: scale(1.05);
+}
+
+.product-price {
+  color: var(--primary-color);
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.product-name {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 5px;
+  height: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.product-shop {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 10px;
+}
+
+.product-actions {
+  display: none;
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+}
+
+.product-item:hover .product-actions {
+  display: block;
+}
+
+.add-to-cart-btn {
+  width: 100%;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 6px 0;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color var(--transition-speed);
+}
+
+.add-to-cart-btn:hover {
+  background-color: var(--hover-color);
+}
+
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.empty-state {
+  background-color: white;
+  padding: 40px;
+  border-radius: var(--border-radius);
+  text-align: center;
 }
 </style>
