@@ -676,18 +676,36 @@ const ProcessDesigner: React.FC<{}> = () => {
   // Handle connections between nodes
   const onConnect = useCallback(
     (params: Connection) => {
-      // Create edge with animated style and arrow marker
+      // Create edge with enhanced animated style and arrow marker
       const edge = {
         ...params,
         type: 'smoothstep',
         animated: true,
-        style: { stroke: '#555' },
+        style: { 
+          stroke: '#555',
+          strokeWidth: 2,
+          opacity: 0.8,
+          transition: 'all 0.3s ease'
+        },
         markerEnd: {
           type: MarkerType.ArrowClosed,
           width: 20,
           height: 20,
           color: '#555',
         },
+        label: params.source && params.target && params.source.includes('math') && params.target.includes('math') ? 'Result →' : '',
+        labelStyle: { 
+          fill: '#666', 
+          fontWeight: 500, 
+          fontSize: 12,
+          textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+        },
+        labelBgStyle: { 
+          fill: 'rgba(255, 255, 255, 0.8)',
+          fillOpacity: 0.8,
+          borderRadius: 4,
+          padding: 4
+        }
       };
       setEdges((eds) => addEdge(edge, eds));
     },
@@ -949,20 +967,23 @@ const ProcessDesigner: React.FC<{}> = () => {
   return (
     <div className="app-container">
       <div className="sidebar">
-        <h2 className="text-xl font-bold mb-4">Process Orchestration</h2>
+        <h2 className="text-2xl font-bold mb-4 text-gray-800 pb-2 border-b">Process Orchestration</h2>
         
         <div className="node-palette mb-6">
-          <h3 className="text-lg font-semibold mb-2">Available Nodes</h3>
-          {Object.entries(NODE_TYPE_DEFINITIONS).map(([type, def]) => (
-            <NodeTypeItem
-              key={type}
-              type={type}
-              label={def.label}
-              description={def.description}
-              color={def.color}
-              onDragStart={onDragStart}
-            />
-          ))}
+          <h3 className="text-lg font-semibold mb-3 text-gray-700">Available Nodes</h3>
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-3">
+            {Object.entries(NODE_TYPE_DEFINITIONS).map(([type, def]) => (
+              <NodeTypeItem
+                key={type}
+                type={type}
+                label={def.label}
+                description={def.description}
+                color={def.color}
+                onDragStart={onDragStart}
+              />
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 italic">Drag and drop nodes to the canvas</p>
         </div>
         
         <div className="actions mb-6">
@@ -1002,27 +1023,38 @@ const ProcessDesigner: React.FC<{}> = () => {
           </button>
           {selectedProcessType === 'math' && (
             <>
-              <div className="mt-2 p-3 bg-gray-100 rounded-md border border-gray-300">
-                <h3 className="font-bold text-gray-700 mb-2">How to Use Math Nodes:</h3>
-                <ol className="list-decimal pl-5 text-sm">
-                  <li className="mb-1">Select "Mathematical Process" from the dropdown</li>
-                  <li className="mb-1">Click "Create Example Process" to see the example</li>
-                  <li className="mb-1">The example calculates: 10 * (1*3 + 2*3 + 3*5 + 4*6) / 2</li>
-                  <li className="mb-1">Click on any node to see its properties</li>
-                  <li className="mb-1">Click "Verify Math Calculation" to execute and see the result</li>
+              <div className="mt-2 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 shadow-sm">
+                <h3 className="font-bold text-gray-800 mb-3 pb-1 border-b border-blue-100">How to Use Math Nodes:</h3>
+                <ol className="list-decimal pl-5 text-sm space-y-2">
+                  <li className="text-gray-700">Select "Mathematical Process" from the dropdown</li>
+                  <li className="text-gray-700">Click "Create Example Process" to see the example</li>
+                  <li className="text-gray-700">The example calculates: 10 * (1*3 + 2*3 + 3*5 + 4*6 + 5*7 + 6*8) / 2</li>
+                  <li className="text-gray-700">Click on any node to see its properties</li>
+                  <li className="text-gray-700">Notice how nodes at the same level execute in parallel</li>
+                  <li className="text-gray-700">Click "Verify Math Calculation" to execute and see the result</li>
                 </ol>
-                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
-                  <p><strong>Expected Result:</strong> 240</p>
-                  <p><strong>Explanation:</strong></p>
-                  <ul className="list-disc pl-4">
-                    <li>Layer 3: 1*3=3, 2*3=6, 3*5=15, 4*6=24</li>
-                    <li>Layer 2: 3+6=9, 15+24=39, 9+39=48</li>
-                    <li>Layer 1: 10*48=480, 480/2=240</li>
-                  </ul>
+                <div className="mt-3 p-3 bg-white border border-blue-200 rounded-lg text-sm shadow-inner">
+                  <p className="font-bold text-blue-700 mb-2">Calculation Breakdown:</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    <div className="p-2 bg-purple-50 rounded border border-purple-100">
+                      <p className="font-semibold text-purple-700">Layer 3: Individual Multiplications</p>
+                      <p className="text-gray-600">1×3=3, 2×3=6, 3×5=15, 4×6=24, 5×7=35, 6×8=48</p>
+                    </div>
+                    <div className="p-2 bg-indigo-50 rounded border border-indigo-100">
+                      <p className="font-semibold text-indigo-700">Layer 2: Parallel Operations</p>
+                      <p className="text-gray-600">3+6=9, 15+24=39, 35+48=83, 39-9=30, 9×2=18</p>
+                      <p className="text-gray-600">Final addition: 30+83+18=131</p>
+                    </div>
+                    <div className="p-2 bg-blue-50 rounded border border-blue-100">
+                      <p className="font-semibold text-blue-700">Layer 1: Final Calculation</p>
+                      <p className="text-gray-600">10×131=1310, 1310÷2=655</p>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-center font-bold text-green-600">Expected Result: 655</p>
                 </div>
               </div>
               <button
-                className="w-full mt-2 px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors"
+                className="w-full mt-2 px-4 py-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-md hover:from-pink-700 hover:to-purple-700 transition-all shadow-md"
                 onClick={async () => {
                   try {
                     const response = await createMathExample();
