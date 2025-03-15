@@ -54,6 +54,16 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, type }) => {
   const renderMathNodeContent = () => {
     if (!type.startsWith('math.')) return null;
     
+    // Use the node label if available, as it contains the correct operation display
+    if (data.label && data.label.includes(getOperationSymbol())) {
+      return (
+        <div style={{ fontSize: '14px', marginTop: '2px', color: 'white' }}>
+          {data.label}
+        </div>
+      );
+    }
+    
+    // Fallback to properties if no label is available
     const leftValue = data.properties.leftOperand || data.properties.leftNodeResult || '?';
     const rightValue = data.properties.rightOperand || data.properties.rightNodeResult || '?';
     
@@ -113,11 +123,16 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, type }) => {
         }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div style={{ textAlign: 'center', padding: '5px', fontSize: '12px', fontWeight: 'bold' }}>
-          {data.label}
-        </div>
-        {renderMathNodeContent()}
-        {getResultValue()}
+        {type.startsWith('math.') ? (
+          <React.Fragment>
+            {renderMathNodeContent()}
+            {getResultValue()}
+          </React.Fragment>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '5px', fontSize: '12px', fontWeight: 'bold' }}>
+            {data.label}
+          </div>
+        )}
       </div>
       
       {/* Handles */}
