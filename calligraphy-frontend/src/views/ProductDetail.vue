@@ -1,72 +1,145 @@
 <template>
-  <div class="product-detail" style="animation: fadeIn 0.5s ease-out; padding: 20px 0; background: linear-gradient(to bottom, rgba(24, 144, 255, 0.05), transparent 300px);">
-    <a-spin :spinning="loading">
-      <a-page-header
-        :title="product.productName"
-        @back="goBack"
-        style="background: linear-gradient(135deg, rgba(24, 144, 255, 0.05), transparent); border-radius: 8px; margin-bottom: 20px;"
-      />
-      
-      <a-row :gutter="24">
-        <a-col :span="12">
-          <img
-            :src="getCartoonImage(product.imagePath)"
-            alt="Product Image"
-            class="product-image"
-          />
-        </a-col>
+  <div class="product-detail-page">
+    <div class="container">
+      <a-spin :spinning="loading">
+        <!-- Breadcrumb navigation -->
+        <div class="breadcrumb">
+          <a @click="$router.push('/')">首页</a> &gt;
+          <a @click="$router.push('/products')">全部商品</a> &gt;
+          <a @click="$router.push(`/products?category=${product.category}`)">{{ getCategoryName(product.category) }}</a> &gt;
+          <span>{{ product.productName }}</span>
+        </div>
         
-        <a-col :span="12">
-          <div class="product-info">
-            <h1 style="background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">{{ product.productName }}</h1>
-            <a-tag color="blue">{{ product.category }}</a-tag>
-            
-            <div class="price-section">
-              <h2 class="price">${{ product.price }}</h2>
-              <p>In Stock: {{ product.inventory }} items</p>
+        <div class="product-container" v-if="!error">
+          <div class="product-left">
+            <div class="product-image">
+              <img :src="getCartoonImage(product.imagePath)" :alt="product.productName" />
             </div>
-            
-            <div class="description-section">
-              <h3>Description</h3>
-              <p>{{ product.description }}</p>
-            </div>
-            
-            <div class="actions">
-              <button class="primary-button" @click="showChatModal" type="button">
-                <span style="font-weight: 500;">💬 Add to Chat</span>
-              </button>
+            <div class="product-thumbnails">
+              <div class="thumbnail active">
+                <img :src="getCartoonImage(product.imagePath)" :alt="product.productName" />
+              </div>
             </div>
           </div>
-        </a-col>
-      </a-row>
-    </a-spin>
-    
-    <a-result
-      v-if="error"
-      status="404"
-      title="404"
-      sub-title="Sorry, the product you visited does not exist."
-    >
-      <template #extra>
-        <a-button type="primary" @click="goBack">
-          Back to Products
-        </a-button>
-      </template>
-    </a-result>
+          
+          <div class="product-right">
+            <h1 class="product-title">{{ product.productName }}</h1>
+            <div class="product-shop">书法艺术自营</div>
+            
+            <div class="product-price-section">
+              <div class="price-label">价格</div>
+              <div class="product-price">¥{{ product.price }}</div>
+            </div>
+            
+            <div class="product-promotion">
+              <div class="promotion-label">促销</div>
+              <div class="promotion-content">
+                <span class="promotion-tag">限时优惠</span>
+                <span class="promotion-desc">购买即送精美书签一枚</span>
+              </div>
+            </div>
+            
+            <div class="product-delivery">
+              <div class="delivery-label">配送</div>
+              <div class="delivery-content">
+                <div class="delivery-address">北京朝阳区三环到四环之间</div>
+                <div class="delivery-time">有货，支持99元免运费</div>
+              </div>
+            </div>
+            
+            <div class="product-quantity">
+              <div class="quantity-label">数量</div>
+              <div class="quantity-content">
+                <a-input-number v-model:value="quantity" :min="1" :max="product.inventory" />
+                <span class="inventory">库存{{ product.inventory }}件</span>
+              </div>
+            </div>
+            
+            <div class="product-actions">
+              <button class="buy-now-btn">立即购买</button>
+              <button class="add-to-cart-btn">加入购物车</button>
+              <button class="chat-btn" @click="showChatModal">
+                <i class="chat-icon">💬</i>
+                客服咨询
+              </button>
+            </div>
+            
+            <div class="product-services">
+              <div class="service-item">
+                <i class="service-icon">✓</i>
+                <span>正品保证</span>
+              </div>
+              <div class="service-item">
+                <i class="service-icon">✓</i>
+                <span>急速退款</span>
+              </div>
+              <div class="service-item">
+                <i class="service-icon">✓</i>
+                <span>7天无理由退换</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="product-detail-tabs">
+          <a-tabs default-active-key="1">
+            <a-tab-pane key="1" tab="商品介绍">
+              <div class="product-description">
+                <h3>商品详情</h3>
+                <div class="description-content">
+                  {{ product.description }}
+                </div>
+              </div>
+            </a-tab-pane>
+            <a-tab-pane key="2" tab="规格参数">
+              <div class="product-specs">
+                <table class="specs-table">
+                  <tr>
+                    <th>品牌</th>
+                    <td>书法艺术</td>
+                  </tr>
+                  <tr>
+                    <th>商品名称</th>
+                    <td>{{ product.productName }}</td>
+                  </tr>
+                  <tr>
+                    <th>商品分类</th>
+                    <td>{{ getCategoryName(product.category) }}</td>
+                  </tr>
+                </table>
+              </div>
+            </a-tab-pane>
+          </a-tabs>
+        </div>
+        
+        <a-result
+          v-if="error"
+          status="404"
+          title="404"
+          sub-title="抱歉，您访问的商品不存在。"
+        >
+          <template #extra>
+            <a-button type="primary" @click="goBack">
+              返回商品列表
+            </a-button>
+          </template>
+        </a-result>
+      </a-spin>
+    </div>
     
     <!-- Custom Chat Modal -->
     <div v-show="chatModalVisible" class="custom-modal-overlay">
       <div class="custom-modal">
         <div class="custom-modal-header">
-          <h3>Customer Service</h3>
+          <h3>客服咨询</h3>
           <button class="close-button" @click="closeChatModal">×</button>
         </div>
         <div class="chat-container">
           <div class="chat-messages">
             <div v-for="(item, index) in chatMessages" :key="index" 
                  :class="['message', item.sender === 'user' ? 'user-message' : 'bot-message']">
-              <div class="avatar" :style="{ backgroundColor: item.sender === 'user' ? '#1890ff' : '#52c41a' }">
-                {{ item.sender === 'user' ? 'U' : 'CS' }}
+              <div class="avatar" :style="{ backgroundColor: item.sender === 'user' ? '#e1251b' : '#52c41a' }">
+                {{ item.sender === 'user' ? '我' : '客服' }}
               </div>
               <div class="message-content">{{ item.content }}</div>
             </div>
@@ -75,12 +148,12 @@
           <div class="chat-input">
             <input
               v-model="userMessage"
-              placeholder="Ask about this product..."
+              placeholder="请输入您的问题..."
               @keyup.enter="sendMessage"
               class="chat-input-field"
             />
             <button class="send-button" @click="sendMessage" :disabled="sendingMessage">
-              {{ sendingMessage ? 'Sending...' : 'Send' }}
+              {{ sendingMessage ? '发送中...' : '发送' }}
             </button>
           </div>
         </div>
@@ -107,6 +180,7 @@ export default {
     const chatMessages = ref([]);
     const userMessage = ref('');
     const sendingMessage = ref(false);
+    const quantity = ref(1);
     
     const fetchProduct = async () => {
       const productId = route.params.id;
@@ -122,6 +196,18 @@ export default {
       } finally {
         loading.value = false;
       }
+    };
+    
+    const getCategoryName = (category) => {
+      const categoryMap = {
+        'brushes': '毛笔',
+        'ink': '墨水',
+        'paper': '宣纸',
+        'calligraphy works': '书法作品',
+        'accessories': '书法配件',
+        'sets': '书法套装'
+      };
+      return categoryMap[category] || category;
     };
     
     const goBack = () => {
@@ -217,125 +303,348 @@ export default {
       chatMessages,
       userMessage,
       sendingMessage,
+      quantity,
       showChatModal,
       closeChatModal,
       sendMessage,
-      getCartoonImage
+      getCartoonImage,
+      getCategoryName
     };
   }
 };
 </script>
 
 <style scoped>
-.product-detail {
+.product-detail-page {
+  background-color: var(--light-bg);
   padding: 20px 0;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.breadcrumb {
+  margin-bottom: 15px;
+  font-size: 12px;
+  color: #666;
+}
+
+.breadcrumb a {
+  color: #666;
+  text-decoration: none;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.breadcrumb a:hover {
+  color: var(--primary-color);
+}
+
+.breadcrumb span {
+  color: #999;
+  margin: 0 5px;
+}
+
+.product-container {
+  display: flex;
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  margin-bottom: 20px;
+  padding: 20px;
+}
+
+.product-left {
+  width: 400px;
+  margin-right: 20px;
 }
 
 .product-image {
   width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s;
-  border: 4px solid white;
+  height: 400px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 1px solid #eee;
 }
 
-.product-image:hover {
-  transform: scale(1.02);
-  box-shadow: var(--hover-shadow);
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-.product-info {
-  padding: 0 24px;
+.product-thumbnails {
+  display: flex;
+  gap: 10px;
 }
 
-.product-info h1 {
-  font-size: 28px;
-  margin-bottom: 16px;
-  border-bottom: 2px solid #1890ff;
-  padding-bottom: 8px;
-  font-weight: 600;
+.thumbnail {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  overflow: hidden;
 }
 
-:deep(.ant-tag) {
-  font-size: 14px;
-  padding: 4px 12px;
-  border-radius: 16px;
-  background: var(--primary-gradient);
-  color: white;
-  border: none;
+.thumbnail.active {
+  border: 2px solid var(--primary-color);
 }
 
-.price-section {
-  margin: 24px 0;
-  padding: 20px;
-  background: linear-gradient(to right, rgba(24, 144, 255, 0.05), white);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #1890ff;
-  animation: slideUp 0.5s ease-out;
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.price {
-  color: #1890ff;
-  font-size: 32px;
-  font-weight: bold;
-  margin-bottom: 8px;
-  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block;
+.product-right {
+  flex: 1;
+  padding: 0 20px;
 }
 
-.description-section {
-  margin-bottom: 32px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  animation: slideUp 0.5s ease-out;
-  border-top: 4px solid #36cfc9;
-}
-
-.description-section h3 {
+.product-title {
   font-size: 20px;
-  margin-bottom: 16px;
-  color: #333333;
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1), transparent);
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.product-shop {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 15px;
+}
+
+.product-price-section {
+  display: flex;
+  align-items: center;
+  background-color: #f7f7f7;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.price-label {
+  width: 60px;
+  color: #999;
+  font-size: 14px;
+}
+
+.product-price {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.product-promotion {
+  display: flex;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.promotion-label {
+  width: 60px;
+  color: #999;
+  font-size: 14px;
+}
+
+.promotion-content {
+  flex: 1;
+}
+
+.promotion-tag {
   display: inline-block;
-  padding: 6px 12px;
-  border-radius: 4px;
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 12px;
+  padding: 2px 5px;
+  margin-right: 10px;
 }
 
-.actions {
-  margin-top: 32px;
+.promotion-desc {
+  font-size: 14px;
+  color: #333;
 }
 
-.primary-button {
-  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
+.product-delivery {
+  display: flex;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.delivery-label {
+  width: 60px;
+  color: #999;
+  font-size: 14px;
+}
+
+.delivery-content {
+  flex: 1;
+}
+
+.delivery-address {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.delivery-time {
+  font-size: 12px;
+  color: #999;
+}
+
+.product-quantity {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.quantity-label {
+  width: 60px;
+  color: #999;
+  font-size: 14px;
+  line-height: 32px;
+}
+
+.quantity-content {
+  display: flex;
+  align-items: center;
+}
+
+.inventory {
+  margin-left: 10px;
+  font-size: 12px;
+  color: #999;
+}
+
+.product-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.buy-now-btn {
+  background-color: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 24px;
-  padding: 10px 24px;
+  border-radius: var(--border-radius);
+  padding: 10px 30px;
   font-size: 16px;
   cursor: pointer;
-  height: 48px;
-  line-height: 28px;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-  transition: all 0.3s;
-  width: 100%;
-  max-width: 200px;
+  transition: all var(--transition-speed);
 }
 
-.primary-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.5);
-  opacity: 0.9;
+.buy-now-btn:hover {
+  background-color: var(--hover-color);
 }
 
-.chat-container {
+.add-to-cart-btn {
+  background-color: #ff9700;
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 10px 30px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+}
+
+.add-to-cart-btn:hover {
+  background-color: #e68a00;
+}
+
+.chat-btn {
   display: flex;
-  flex-direction: column;
-  height: 400px;
+  align-items: center;
+  background-color: white;
+  color: #666;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+}
+
+.chat-btn:hover {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.chat-icon {
+  margin-right: 5px;
+  font-style: normal;
+}
+
+.product-services {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.service-item {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #999;
+}
+
+.service-icon {
+  color: var(--primary-color);
+  margin-right: 5px;
+  font-style: normal;
+}
+
+.product-detail-tabs {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  padding: 20px;
+}
+
+.product-description {
+  padding: 20px 0;
+}
+
+.product-description h3 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.description-content {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.product-specs {
+  padding: 20px 0;
+}
+
+.specs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.specs-table th, .specs-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.specs-table th {
+  width: 100px;
+  color: #999;
+  font-weight: normal;
+}
+
+.specs-table td {
+  color: #333;
 }
 
 /* Chat modal styling */
@@ -380,7 +689,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  background: var(--primary-gradient);
+  background-color: var(--primary-color);
   color: white;
 }
 
@@ -401,6 +710,12 @@ export default {
 
 .close-button:hover {
   transform: rotate(90deg);
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 400px;
 }
 
 .chat-messages {
@@ -452,7 +767,7 @@ export default {
 }
 
 .user-message .message-content {
-  background: #e6f7ff;
+  background: #fff1f0;
   border-top-right-radius: 4px;
 }
 
@@ -478,24 +793,25 @@ export default {
 
 .chat-input-field:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(225, 37, 27, 0.2);
 }
 
 .send-button {
   padding: 0 20px;
-  background: var(--primary-gradient);
+  background-color: var(--primary-color);
   color: white;
   border: none;
   border-radius: 24px;
   cursor: pointer;
   height: 40px;
-  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3);
+  box-shadow: 0 2px 6px rgba(225, 37, 27, 0.3);
   transition: all var(--transition-speed);
 }
 
 .send-button:hover {
+  background-color: var(--hover-color);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.5);
+  box-shadow: 0 4px 12px rgba(225, 37, 27, 0.5);
 }
 
 .send-button:disabled {
