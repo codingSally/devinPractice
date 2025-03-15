@@ -44,6 +44,35 @@ public class ProcessNodeFactory {
                 .properties(new HashMap<>())
                 .build()
         );
+        
+        // Register math node types
+        registerNodeType("math.addition", () -> 
+            ProcessNode.builder()
+                .type("math.addition")
+                .properties(new HashMap<>())
+                .build()
+        );
+        
+        registerNodeType("math.subtraction", () -> 
+            ProcessNode.builder()
+                .type("math.subtraction")
+                .properties(new HashMap<>())
+                .build()
+        );
+        
+        registerNodeType("math.multiplication", () -> 
+            ProcessNode.builder()
+                .type("math.multiplication")
+                .properties(new HashMap<>())
+                .build()
+        );
+        
+        registerNodeType("math.division", () -> 
+            ProcessNode.builder()
+                .type("math.division")
+                .properties(new HashMap<>())
+                .build()
+        );
     }
     
     /**
