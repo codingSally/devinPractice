@@ -21,6 +21,14 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, type }) => {
         return '#FF9800';
       case 'conditional':
         return '#9C27B0';
+      case 'math.addition':
+        return '#E91E63';
+      case 'math.subtraction':
+        return '#673AB7';
+      case 'math.multiplication':
+        return '#00BCD4';
+      case 'math.division':
+        return '#FF5722';
       default:
         return '#555';
     }
