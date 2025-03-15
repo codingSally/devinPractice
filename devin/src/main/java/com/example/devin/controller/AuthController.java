@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin
 public class AuthController {
+    private static final Logger logger = Logger.getLogger(AuthController.class.getName());
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -36,7 +39,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody LoginRequest authenticationRequest) throws Exception {
         try {
-            System.out.println("Login attempt with username: " + authenticationRequest.getUsername());
+            logger.info("Login attempt with username: " + authenticationRequest.getUsername());
             
             // Comment out authentication for debugging as requested by user
             // authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
@@ -51,11 +54,11 @@ public class AuthController {
             response.put("role", user.getRole());
             response.put("username", user.getUsername());
             
-            System.out.println("Login successful for user: " + authenticationRequest.getUsername() + " with role: " + user.getRole());
+            logger.info("Login successful for user: " + authenticationRequest.getUsername() + " with role: " + user.getRole());
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            System.out.println("Login failed for user: " + authenticationRequest.getUsername() + " - " + e.getMessage());
+            logger.log(Level.SEVERE, "Login failed for user: " + authenticationRequest.getUsername() + " - " + e.getMessage(), e);
             throw e;
         }
     }
@@ -72,31 +75,31 @@ public class AuthController {
 
     private void authenticate(String username, String password) throws Exception {
         try {
-            System.out.println("Attempting to authenticate user: " + username);
-            System.out.println("Password length: " + password.length());
+            logger.info("Attempting to authenticate user: " + username);
+            logger.info("Password length: " + password.length());
             
             // Get user from database for debugging
             User user = userService.findByUsername(username);
             if (user != null) {
-                System.out.println("User found in database: " + username);
-                System.out.println("Stored password hash length: " + user.getPassword().length());
-                System.out.println("User role: " + user.getRole());
+                logger.info("User found in database: " + username);
+                logger.info("Stored password hash length: " + user.getPassword().length());
+                logger.info("User role: " + user.getRole());
             } else {
-                System.out.println("User not found in database: " + username);
+                logger.info("User not found in database: " + username);
             }
             
             // Attempt authentication
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-            System.out.println("Authentication successful for user: " + username);
+            logger.info("Authentication successful for user: " + username);
         } catch (DisabledException e) {
-            System.out.println("Authentication failed: User disabled");
+            logger.log(Level.WARNING, "Authentication failed: User disabled", e);
             throw new Exception("USER_DISABLED", e);
         } catch (BadCredentialsException e) {
-            System.out.println("Authentication failed: Invalid credentials");
-            System.out.println("BadCredentialsException message: " + e.getMessage());
+            logger.log(Level.WARNING, "Authentication failed: Invalid credentials", e);
+            logger.log(Level.WARNING, "BadCredentialsException message: " + e.getMessage(), e);
             throw new Exception("INVALID_CREDENTIALS", e);
         } catch (Exception e) {
-            System.out.println("Authentication failed with unexpected error: " + e.getMessage());
+            logger.log(Level.SEVERE, "Authentication failed with unexpected error: " + e.getMessage(), e);
             e.printStackTrace();
             throw new Exception("AUTHENTICATION_ERROR", e);
         }
