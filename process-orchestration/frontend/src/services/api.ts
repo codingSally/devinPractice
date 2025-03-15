@@ -47,3 +47,8 @@ export const getNodeTypes = () => {
 export const getProcessExecutionStatus = (executionId: number) => {
   return api.get(`/executions/${executionId}`);
 };
+
+// Create and execute a mathematical example process
+export const createMathExample = () => {
+  return api.get('/math/example');
+};

@@ -13,7 +13,7 @@ import ReactFlow, {
   Edge
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { createProcessDefinition, executeProcess, getProcessExecutionStatus } from '../services/api';
+import { createProcessDefinition, executeProcess, getProcessExecutionStatus, createMathExample } from '../services/api';
 import { createNode, convertToProcessDefinition, NODE_TYPE_DEFINITIONS } from '../utils/processUtils';
 import CustomNode from '../components/CustomNode';
 import NodeTypeItem from '../components/NodeTypeItem';
@@ -376,6 +376,126 @@ const createComplexProcess = (): { nodes: Node[], edges: Edge[] } => {
   };
 };
 
+// Mathematical Process Example: 10 * (1*3 + 2*3 + 3*5 + 4*6) / 2
+const createMathProcess = (): { nodes: Node[], edges: Edge[] } => {
+  // Create nodes for the three-layer structure
+  
+  // Layer 3: Individual multiplication operations
+  const mult1 = createNode('math.multiplication', { x: 100, y: 100 });
+  (mult1.data.properties as any).leftOperand = '1';
+  (mult1.data.properties as any).rightOperand = '3';
+  
+  const mult2 = createNode('math.multiplication', { x: 250, y: 100 });
+  (mult2.data.properties as any).leftOperand = '2';
+  (mult2.data.properties as any).rightOperand = '3';
+  
+  const mult3 = createNode('math.multiplication', { x: 400, y: 100 });
+  (mult3.data.properties as any).leftOperand = '3';
+  (mult3.data.properties as any).rightOperand = '5';
+  
+  const mult4 = createNode('math.multiplication', { x: 550, y: 100 });
+  (mult4.data.properties as any).leftOperand = '4';
+  (mult4.data.properties as any).rightOperand = '6';
+  
+  // Layer 2: Addition operations
+  const add1 = createNode('math.addition', { x: 175, y: 200 });
+  
+  const add2 = createNode('math.addition', { x: 475, y: 200 });
+  
+  const addFinal = createNode('math.addition', { x: 325, y: 300 });
+  
+  // Layer 1: Multiplication and division operations
+  const mult5 = createNode('math.multiplication', { x: 250, y: 400 });
+  (mult5.data.properties as any).leftOperand = '10';
+  
+  const div1 = createNode('math.division', { x: 400, y: 500 });
+  (div1.data.properties as any).rightOperand = '2';
+  
+  // Create edges
+  const edges: Edge[] = [
+    // Layer 3 to Layer 2
+    {
+      id: `${mult1.id}-${add1.id}`,
+      source: mult1.id,
+      target: add1.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${mult2.id}-${add1.id}`,
+      source: mult2.id,
+      target: add1.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${mult3.id}-${add2.id}`,
+      source: mult3.id,
+      target: add2.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${mult4.id}-${add2.id}`,
+      source: mult4.id,
+      target: add2.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    
+    // Layer 2 to Layer 2
+    {
+      id: `${add1.id}-${addFinal.id}`,
+      source: add1.id,
+      target: addFinal.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    {
+      id: `${add2.id}-${addFinal.id}`,
+      source: add2.id,
+      target: addFinal.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    
+    // Layer 2 to Layer 1
+    {
+      id: `${addFinal.id}-${mult5.id}`,
+      source: addFinal.id,
+      target: mult5.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    },
+    
+    // Layer 1 to Layer 1
+    {
+      id: `${mult5.id}-${div1.id}`,
+      source: mult5.id,
+      target: div1.id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#555' },
+    }
+  ];
+  
+  return {
+    nodes: [
+      mult1, mult2, mult3, mult4,
+      add1, add2, addFinal,
+      mult5, div1
+    ],
+    edges
+  };
+};
+
 // Define node types for ReactFlow
 const nodeTypes = {
   logging: CustomNode,
@@ -653,6 +773,9 @@ const ProcessDesigner: React.FC<{}> = () => {
       case 'complex':
         processConfig = createComplexProcess();
         break;
+      case 'math':
+        processConfig = createMathProcess();
+        break;
       default:
         processConfig = createSequentialProcess();
     }
@@ -713,6 +836,7 @@ const ProcessDesigner: React.FC<{}> = () => {
               <option value="parallel">Parallel Process</option>
               <option value="conditional">Conditional Process</option>
               <option value="complex">Complex Multi-Level Process</option>
+              <option value="math">Mathematical Process</option>
             </select>
           </div>
           <button
@@ -721,6 +845,26 @@ const ProcessDesigner: React.FC<{}> = () => {
           >
             Create Example Process
           </button>
+          {selectedProcessType === 'math' && (
+            <button
+              className="w-full mt-2 px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors"
+              onClick={async () => {
+                try {
+                  const response = await createMathExample();
+                  setExecutionStatus({
+                    status: 'COMPLETED',
+                    result: response.data
+                  });
+                  toast.success('Math example executed successfully!');
+                } catch (error) {
+                  console.error('Failed to execute math example:', error);
+                  toast.error('Failed to execute math example');
+                }
+              }}
+            >
+              Verify Math Calculation
+            </button>
+          )}
         </div>
         
         <div className="process-info">
