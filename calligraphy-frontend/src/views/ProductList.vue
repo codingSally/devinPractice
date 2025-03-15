@@ -5,53 +5,57 @@
       <img src="../images/banner1.jpg" alt="Banner" class="banner-image" />
     </div>
     
-    <!-- Filters section -->
+    <!-- Filters section (JD.com style) -->
     <div class="filters-section">
       <div class="container">
         <div class="filters">
-          <a-row :gutter="16">
-            <a-col :span="6">
+          <div class="filter-row">
+            <div class="filter-label">Category:</div>
+            <div class="filter-options">
               <a-select
                 v-model:value="categoryFilter"
-                placeholder="Category Filter"
-                style="width: 100%"
+                placeholder="All Categories"
+                style="width: 180px"
                 @change="applyFilters"
+                class="jd-select"
               >
                 <a-select-option value="">All Categories</a-select-option>
                 <a-select-option value="brushes">Brushes</a-select-option>
                 <a-select-option value="ink">Ink</a-select-option>
                 <a-select-option value="paper">Rice Paper</a-select-option>
                 <a-select-option value="calligraphy works">Calligraphy Works</a-select-option>
+                <a-select-option value="accessories">Accessories</a-select-option>
+                <a-select-option value="sets">Calligraphy Sets</a-select-option>
               </a-select>
-            </a-col>
-            
-            <a-col :span="12">
-              <a-row :gutter="8">
-                <a-col :span="11">
-                  <a-input-number
-                    v-model:value="minPrice"
-                    placeholder="Min Price"
-                    style="width: 100%"
-                    :min="0"
-                  />
-                </a-col>
-                <a-col :span="2" style="text-align: center">-</a-col>
-                <a-col :span="11">
-                  <a-input-number
-                    v-model:value="maxPrice"
-                    placeholder="Max Price"
-                    style="width: 100%"
-                    :min="0"
-                  />
-                </a-col>
-              </a-row>
-            </a-col>
-            
-            <a-col :span="6">
-              <a-button type="primary" @click="applyFilters">Apply Filters</a-button>
-              <a-button style="margin-left: 8px" @click="resetFilters">Reset</a-button>
-            </a-col>
-          </a-row>
+            </div>
+          </div>
+          
+          <div class="filter-row">
+            <div class="filter-label">Price:</div>
+            <div class="filter-options">
+              <div class="price-range">
+                <a-input-number
+                  v-model:value="minPrice"
+                  placeholder="¥"
+                  :min="0"
+                  class="price-input"
+                />
+                <span class="price-separator">-</span>
+                <a-input-number
+                  v-model:value="maxPrice"
+                  placeholder="¥"
+                  :min="0"
+                  class="price-input"
+                />
+                <a-button type="primary" class="price-btn" @click="applyFilters">Apply</a-button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="filter-actions">
+            <a-button type="primary" class="filter-btn" @click="applyFilters">Apply Filters</a-button>
+            <a-button class="reset-btn" @click="resetFilters">Reset</a-button>
+          </div>
         </div>
       </div>
     </div>
@@ -213,10 +217,69 @@ export default {
   padding: 15px 0;
   margin-bottom: 20px;
   box-shadow: var(--card-shadow);
+  border-radius: 4px;
 }
 
 .filters {
-  padding: 10px;
+  padding: 15px;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.filter-label {
+  width: 80px;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.filter-options {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.jd-select {
+  border-radius: 2px;
+}
+
+.price-range {
+  display: flex;
+  align-items: center;
+}
+
+.price-input {
+  width: 100px;
+}
+
+.price-separator {
+  margin: 0 10px;
+  color: #999;
+}
+
+.price-btn {
+  margin-left: 10px;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.filter-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.filter-btn {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.reset-btn {
+  margin-left: 10px;
 }
 
 .product-grid-section {
@@ -227,6 +290,7 @@ export default {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 15px;
+  margin-top: 20px;
 }
 
 .product-item {
@@ -235,26 +299,31 @@ export default {
   overflow: hidden;
   transition: all var(--transition-speed);
   cursor: pointer;
-  padding: 10px;
+  padding: 15px;
   position: relative;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .product-item:hover {
   transform: translateY(-2px);
   box-shadow: var(--hover-shadow);
+  border: 1px solid var(--primary-color);
 }
 
 .product-image {
   width: 100%;
-  height: 200px;
+  height: 220px;
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .product-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.3s;
 }
 

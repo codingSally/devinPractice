@@ -6,7 +6,22 @@
  */
 export function getCartoonImage(imageUrl) {
   // Using local images stored in the public directory
-  // These are cute cartoon animal images that match the style requested by the user
+  // These include product images and cute cartoon animal images
+  
+  // First, randomly decide whether to use a product image (higher probability)
+  const useProductImage = Math.random() < 0.7; // 70% chance to use product images
+  
+  if (useProductImage) {
+    // Use one of the product images
+    const productImages = [
+      '/images/products/product1.png',
+      '/images/products/product2.png'
+    ];
+    const randomIndex = Math.floor(Math.random() * productImages.length);
+    return productImages[randomIndex];
+  }
+  
+  // Otherwise use animal images based on category
   let animal;
   
   if (imageUrl && imageUrl.includes('brush')) {
