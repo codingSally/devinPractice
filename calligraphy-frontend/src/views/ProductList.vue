@@ -65,7 +65,24 @@
       <div class="container">
         <a-spin :spinning="loading">
           <div v-if="products.length === 0 && !loading" class="empty-state">
-            <a-empty description="No products found" />
+            <img src="/images/products/empty/jd_style_empty_state.svg" alt="No products found" class="empty-state-image" />
+            <div class="empty-state-text">
+              <h3>No products found</h3>
+              <p>Try adjusting your search or filter to find what you are looking for.</p>
+              <a-button type="primary" class="browse-btn" @click="resetFilters">Browse Popular Products</a-button>
+            </div>
+            <div class="empty-state-recommendations">
+              <h4>You might be interested in</h4>
+              <div class="recommendation-items">
+                <div class="recommendation-item" v-for="i in 4" :key="i" @click="resetFilters">
+                  <div class="rec-image">
+                    <img :src="`/images/products/test_product_images/product${(i % 2) + 1}.svg`" :alt="`Recommendation ${i}`" />
+                  </div>
+                  <div class="rec-name">Recommended Product {{i}}</div>
+                  <div class="rec-price">¥{{99 + (i * 10)}}</div>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div class="product-grid" v-else>
@@ -76,6 +93,10 @@
               <div class="product-price">¥{{ product.price }}</div>
               <div class="product-name">{{ product.productName }}</div>
               <div class="product-shop">Calligraphy Art Store</div>
+              <div class="product-services">
+                <span class="service-tag">Free Shipping</span>
+                <span class="service-tag">Authentic</span>
+              </div>
               <div class="product-actions">
                 <button class="add-to-cart-btn">Add to Cart</button>
               </div>
@@ -289,8 +310,8 @@ export default {
 .product-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 15px;
-  margin-top: 20px;
+  gap: 10px;
+  margin-top: 15px;
 }
 
 .product-item {
@@ -299,7 +320,7 @@ export default {
   overflow: hidden;
   transition: all var(--transition-speed);
   cursor: pointer;
-  padding: 15px;
+  padding: 12px;
   position: relative;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
@@ -353,7 +374,24 @@ export default {
 .product-shop {
   font-size: 12px;
   color: #999;
+  margin-bottom: 5px;
+}
+
+.product-services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
   margin-bottom: 10px;
+}
+
+.service-tag {
+  font-size: 10px;
+  color: #999;
+  background-color: #f5f5f5;
+  border: 1px solid #eee;
+  border-radius: 2px;
+  padding: 1px 4px;
+  display: inline-block;
 }
 
 .product-actions {
@@ -391,8 +429,101 @@ export default {
 
 .empty-state {
   background-color: white;
-  padding: 40px;
+  padding: 30px;
   border-radius: var(--border-radius);
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty-state-image {
+  width: 200px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.empty-state-text {
+  margin-bottom: 30px;
+}
+
+.empty-state-text h3 {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.empty-state-text p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.browse-btn {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.empty-state-recommendations {
+  width: 100%;
+  margin-top: 30px;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
+.empty-state-recommendations h4 {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.recommendation-items {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.recommendation-item {
+  background-color: #f8f8f8;
+  padding: 10px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition-speed);
+}
+
+.recommendation-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--hover-shadow);
+}
+
+.rec-image {
+  width: 100%;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.rec-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.rec-name {
+  font-size: 12px;
+  color: #333;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rec-price {
+  font-size: 14px;
+  color: var(--primary-color);
+  font-weight: bold;
 }
 </style>
