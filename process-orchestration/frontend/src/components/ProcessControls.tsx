@@ -14,9 +14,9 @@ const ProcessControls: React.FC<ProcessControlsProps> = ({
   onClear
 }) => {
   return (
-    <div className="process-controls absolute top-4 right-4 bg-white rounded-md shadow-md p-2 flex flex-col">
+    <div className="process-controls absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 flex flex-col">
       <button
-        className="control-button mb-2 w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-md"
+        className="control-button mb-3 w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-lg transition-all duration-200 border border-gray-200"
         onClick={onZoomIn}
         title="Zoom In"
       >
@@ -29,7 +29,7 @@ const ProcessControls: React.FC<ProcessControlsProps> = ({
       </button>
       
       <button
-        className="control-button mb-2 w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-md"
+        className="control-button mb-3 w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-lg transition-all duration-200 border border-gray-200"
         onClick={onZoomOut}
         title="Zoom Out"
       >
@@ -41,7 +41,7 @@ const ProcessControls: React.FC<ProcessControlsProps> = ({
       </button>
       
       <button
-        className="control-button mb-2 w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-md"
+        className="control-button mb-3 w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-lg transition-all duration-200 border border-gray-200"
         onClick={onFitView}
         title="Fit View"
       >
@@ -51,7 +51,7 @@ const ProcessControls: React.FC<ProcessControlsProps> = ({
       </button>
       
       <button
-        className="control-button w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-md"
+        className="control-button w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-red-50 hover:text-red-500 hover:border-red-200 rounded-lg transition-all duration-200 border border-gray-200"
         onClick={onClear}
         title="Clear Canvas"
       >
