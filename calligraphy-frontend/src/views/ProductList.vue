@@ -13,15 +13,15 @@
             <a-col :span="6">
               <a-select
                 v-model:value="categoryFilter"
-                placeholder="分类筛选"
+                placeholder="Category Filter"
                 style="width: 100%"
                 @change="applyFilters"
               >
-                <a-select-option value="">全部分类</a-select-option>
-                <a-select-option value="brushes">毛笔</a-select-option>
-                <a-select-option value="ink">墨水</a-select-option>
-                <a-select-option value="paper">宣纸</a-select-option>
-                <a-select-option value="calligraphy works">书法作品</a-select-option>
+                <a-select-option value="">All Categories</a-select-option>
+                <a-select-option value="brushes">Brushes</a-select-option>
+                <a-select-option value="ink">Ink</a-select-option>
+                <a-select-option value="paper">Rice Paper</a-select-option>
+                <a-select-option value="calligraphy works">Calligraphy Works</a-select-option>
               </a-select>
             </a-col>
             
@@ -30,7 +30,7 @@
                 <a-col :span="11">
                   <a-input-number
                     v-model:value="minPrice"
-                    placeholder="最低价格"
+                    placeholder="Min Price"
                     style="width: 100%"
                     :min="0"
                   />
@@ -39,7 +39,7 @@
                 <a-col :span="11">
                   <a-input-number
                     v-model:value="maxPrice"
-                    placeholder="最高价格"
+                    placeholder="Max Price"
                     style="width: 100%"
                     :min="0"
                   />
@@ -48,8 +48,8 @@
             </a-col>
             
             <a-col :span="6">
-              <a-button type="primary" @click="applyFilters">应用筛选</a-button>
-              <a-button style="margin-left: 8px" @click="resetFilters">重置</a-button>
+              <a-button type="primary" @click="applyFilters">Apply Filters</a-button>
+              <a-button style="margin-left: 8px" @click="resetFilters">Reset</a-button>
             </a-col>
           </a-row>
         </div>
@@ -61,7 +61,7 @@
       <div class="container">
         <a-spin :spinning="loading">
           <div v-if="products.length === 0 && !loading" class="empty-state">
-            <a-empty description="没有找到相关产品" />
+            <a-empty description="No products found" />
           </div>
           
           <div class="product-grid" v-else>
@@ -71,9 +71,9 @@
               </div>
               <div class="product-price">¥{{ product.price }}</div>
               <div class="product-name">{{ product.productName }}</div>
-              <div class="product-shop">书法艺术自营</div>
+              <div class="product-shop">Calligraphy Art Store</div>
               <div class="product-actions">
-                <button class="add-to-cart-btn">加入购物车</button>
+                <button class="add-to-cart-btn">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -132,7 +132,7 @@ export default {
         products.value = response.data;
         totalProducts.value = response.data.length;
       } catch (error) {
-        console.error('Error fetching products:', error);
+       console.error('Error fetching products:', error);
       } finally {
         loading.value = false;
       }

@@ -4,20 +4,20 @@
     <div class="top-nav">
       <div class="container">
         <div class="top-nav-left">
-          <a href="/">首页</a>
-          <a href="#">位置</a>
+          <a href="/">Home</a>
+          <a href="#">Location</a>
         </div>
         <div class="top-nav-right">
           <template v-if="!isLoggedIn">
-            <a @click="$router.push('/login')">你好，请登录</a>
-            <a @click="$router.push('/login')">免费注册</a>
+            <a @click="$router.push('/login')">Hello, Sign In</a>
+            <a @click="$router.push('/login')">Register</a>
           </template>
           <template v-else>
-            <a>欢迎，{{ username }}</a>
-            <a @click="logout">退出登录</a>
+            <a>Welcome, {{ username }}</a>
+            <a @click="logout">Sign Out</a>
           </template>
-          <a @click="$router.push('/orders')">我的订单</a>
-          <a v-if="isAdmin" @click="$router.push('/admin/products')">商品管理</a>
+          <a @click="$router.push('/orders')">My Orders</a>
+          <a v-if="isAdmin" @click="$router.push('/admin/products')">Product Management</a>
         </div>
       </div>
     </div>
@@ -25,14 +25,14 @@
     <!-- Main header with logo, search and cart (JD style) -->
     <div class="main-header">
       <div class="container">
-        <div class="logo" @click="$router.push('/')">书法艺术</div>
+        <div class="logo" @click="$router.push('/')">Calligraphy Art</div>
         <div class="search-box">
-          <input type="text" placeholder="搜索书法产品" v-model="searchQuery" @keyup.enter="search" />
-          <button @click="search">搜索</button>
+          <input type="text" placeholder="Search calligraphy products" v-model="searchQuery" @keyup.enter="search" />
+          <button @click="search">Search</button>
         </div>
         <div class="shopping-cart" @click="$router.push('/cart')">
           <i class="cart-icon">🛒</i>
-          <span>购物车</span>
+          <span>Cart</span>
         </div>
       </div>
     </div>
@@ -41,13 +41,13 @@
     <div class="category-nav">
       <div class="container">
         <ul class="category-list">
-          <li><router-link to="/products?category=brushes">毛笔</router-link></li>
-          <li><router-link to="/products?category=ink">墨水</router-link></li>
-          <li><router-link to="/products?category=paper">宣纸</router-link></li>
-          <li><router-link to="/products?category=calligraphy works">书法作品</router-link></li>
-          <li><router-link to="/products?category=accessories">书法配件</router-link></li>
-          <li><router-link to="/products?category=sets">书法套装</router-link></li>
-          <li><router-link to="/products">全部商品</router-link></li>
+          <li><router-link to="/products?category=brushes">Brushes</router-link></li>
+          <li><router-link to="/products?category=ink">Ink</router-link></li>
+          <li><router-link to="/products?category=paper">Rice Paper</router-link></li>
+          <li><router-link to="/products?category=calligraphy works">Calligraphy Works</router-link></li>
+          <li><router-link to="/products?category=accessories">Accessories</router-link></li>
+          <li><router-link to="/products?category=sets">Calligraphy Sets</router-link></li>
+          <li><router-link to="/products">All Products</router-link></li>
         </ul>
       </div>
     </div>
@@ -62,32 +62,32 @@
       <div class="container">
         <div class="footer-links">
           <div class="footer-section">
-            <h4>购物指南</h4>
-            <a href="#">购物流程</a>
-            <a href="#">会员介绍</a>
-            <a href="#">常见问题</a>
+            <h4>Shopping Guide</h4>
+            <a href="#">Shopping Process</a>
+            <a href="#">Membership</a>
+            <a href="#">FAQ</a>
           </div>
           <div class="footer-section">
-            <h4>配送方式</h4>
-            <a href="#">上门自提</a>
-            <a href="#">211限时达</a>
-            <a href="#">配送服务查询</a>
+            <h4>Delivery</h4>
+            <a href="#">Store Pickup</a>
+            <a href="#">Express Delivery</a>
+            <a href="#">Delivery Service</a>
           </div>
           <div class="footer-section">
-            <h4>支付方式</h4>
-            <a href="#">货到付款</a>
-            <a href="#">在线支付</a>
-            <a href="#">分期付款</a>
+            <h4>Payment</h4>
+            <a href="#">Cash on Delivery</a>
+            <a href="#">Online Payment</a>
+            <a href="#">Installment</a>
           </div>
           <div class="footer-section">
-            <h4>售后服务</h4>
-            <a href="#">售后政策</a>
-            <a href="#">价格保护</a>
-            <a href="#">退款说明</a>
+            <h4>After-Sales</h4>
+            <a href="#">Return Policy</a>
+            <a href="#">Price Protection</a>
+            <a href="#">Refund Instructions</a>
           </div>
         </div>
         <div class="footer-bottom">
-          <p>书法艺术 ©2025 版权所有</p>
+          <p>Calligraphy Art ©2025 All Rights Reserved</p>
         </div>
       </div>
     </div>
@@ -111,9 +111,9 @@ export default {
     const isAdmin = computed(() => store.getters.isAdmin);
     const username = computed(() => {
       if (store.state.user) {
-        return store.state.user.username || '用户';
+        return store.state.user.username || 'User';
       }
-      return '用户';
+      return 'User';
     });
     
     const logout = () => {

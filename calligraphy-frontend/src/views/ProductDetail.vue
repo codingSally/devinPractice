@@ -4,8 +4,8 @@
       <a-spin :spinning="loading">
         <!-- Breadcrumb navigation -->
         <div class="breadcrumb">
-          <a @click="$router.push('/')">首页</a> &gt;
-          <a @click="$router.push('/products')">全部商品</a> &gt;
+          <a @click="$router.push('/')">Home</a> &gt;
+          <a @click="$router.push('/products')">All Products</a> &gt;
           <a @click="$router.push(`/products?category=${product.category}`)">{{ getCategoryName(product.category) }}</a> &gt;
           <span>{{ product.productName }}</span>
         </div>
@@ -24,58 +24,58 @@
           
           <div class="product-right">
             <h1 class="product-title">{{ product.productName }}</h1>
-            <div class="product-shop">书法艺术自营</div>
+            <div class="product-shop">Calligraphy Art Store</div>
             
             <div class="product-price-section">
-              <div class="price-label">价格</div>
+              <div class="price-label">Price</div>
               <div class="product-price">¥{{ product.price }}</div>
             </div>
             
             <div class="product-promotion">
-              <div class="promotion-label">促销</div>
+              <div class="promotion-label">Promotions</div>
               <div class="promotion-content">
-                <span class="promotion-tag">限时优惠</span>
-                <span class="promotion-desc">购买即送精美书签一枚</span>
+                <span class="promotion-tag">Limited Time Offer</span>
+                <span class="promotion-desc">Free bookmark with purchase</span>
               </div>
             </div>
             
             <div class="product-delivery">
-              <div class="delivery-label">配送</div>
+              <div class="delivery-label">Delivery</div>
               <div class="delivery-content">
-                <div class="delivery-address">北京朝阳区三环到四环之间</div>
-                <div class="delivery-time">有货，支持99元免运费</div>
+                <div class="delivery-address">Between 3rd and 4th Ring Road, Chaoyang District, Beijing</div>
+                <div class="delivery-time">In stock, free shipping on orders over ¥99</div>
               </div>
             </div>
             
             <div class="product-quantity">
-              <div class="quantity-label">数量</div>
+              <div class="quantity-label">Quantity</div>
               <div class="quantity-content">
                 <a-input-number v-model:value="quantity" :min="1" :max="product.inventory" />
-                <span class="inventory">库存{{ product.inventory }}件</span>
+                <span class="inventory">{{ product.inventory }} in stock</span>
               </div>
             </div>
             
             <div class="product-actions">
-              <button class="buy-now-btn">立即购买</button>
-              <button class="add-to-cart-btn">加入购物车</button>
+              <button class="buy-now-btn">Buy Now</button>
+              <button class="add-to-cart-btn">Add to Cart</button>
               <button class="chat-btn" @click="showChatModal">
                 <i class="chat-icon">💬</i>
-                客服咨询
+                Customer Service
               </button>
             </div>
             
             <div class="product-services">
               <div class="service-item">
                 <i class="service-icon">✓</i>
-                <span>正品保证</span>
+                <span>Authentic Guarantee</span>
               </div>
               <div class="service-item">
                 <i class="service-icon">✓</i>
-                <span>急速退款</span>
+                <span>Fast Refund</span>
               </div>
               <div class="service-item">
                 <i class="service-icon">✓</i>
-                <span>7天无理由退换</span>
+                <span>7-Day Return</span>
               </div>
             </div>
           </div>
@@ -83,27 +83,27 @@
         
         <div class="product-detail-tabs">
           <a-tabs default-active-key="1">
-            <a-tab-pane key="1" tab="商品介绍">
+            <a-tab-pane key="1" tab="Product Description">
               <div class="product-description">
-                <h3>商品详情</h3>
+                <h3>Product Details</h3>
                 <div class="description-content">
                   {{ product.description }}
                 </div>
               </div>
             </a-tab-pane>
-            <a-tab-pane key="2" tab="规格参数">
+            <a-tab-pane key="2" tab="Specifications">
               <div class="product-specs">
                 <table class="specs-table">
                   <tr>
-                    <th>品牌</th>
-                    <td>书法艺术</td>
+                    <th>Brand</th>
+                    <td>Calligraphy Art</td>
                   </tr>
                   <tr>
-                    <th>商品名称</th>
+                    <th>Product Name</th>
                     <td>{{ product.productName }}</td>
                   </tr>
                   <tr>
-                    <th>商品分类</th>
+                    <th>Category</th>
                     <td>{{ getCategoryName(product.category) }}</td>
                   </tr>
                 </table>
@@ -116,11 +116,11 @@
           v-if="error"
           status="404"
           title="404"
-          sub-title="抱歉，您访问的商品不存在。"
+          sub-title="Sorry, the product you are looking for does not exist."
         >
           <template #extra>
             <a-button type="primary" @click="goBack">
-              返回商品列表
+              Return to Product List
             </a-button>
           </template>
         </a-result>
@@ -131,7 +131,7 @@
     <div v-show="chatModalVisible" class="custom-modal-overlay">
       <div class="custom-modal">
         <div class="custom-modal-header">
-          <h3>客服咨询</h3>
+          <h3>Customer Service</h3>
           <button class="close-button" @click="closeChatModal">×</button>
         </div>
         <div class="chat-container">
@@ -139,7 +139,7 @@
             <div v-for="(item, index) in chatMessages" :key="index" 
                  :class="['message', item.sender === 'user' ? 'user-message' : 'bot-message']">
               <div class="avatar" :style="{ backgroundColor: item.sender === 'user' ? '#e1251b' : '#52c41a' }">
-                {{ item.sender === 'user' ? '我' : '客服' }}
+                {{ item.sender === 'user' ? 'Me' : 'CS' }}
               </div>
               <div class="message-content">{{ item.content }}</div>
             </div>
@@ -148,12 +148,12 @@
           <div class="chat-input">
             <input
               v-model="userMessage"
-              placeholder="请输入您的问题..."
+              placeholder="Enter your question..."
               @keyup.enter="sendMessage"
               class="chat-input-field"
             />
             <button class="send-button" @click="sendMessage" :disabled="sendingMessage">
-              {{ sendingMessage ? '发送中...' : '发送' }}
+              {{ sendingMessage ? 'Sending...' : 'Send' }}
             </button>
           </div>
         </div>
@@ -200,12 +200,12 @@ export default {
     
     const getCategoryName = (category) => {
       const categoryMap = {
-        'brushes': '毛笔',
-        'ink': '墨水',
-        'paper': '宣纸',
-        'calligraphy works': '书法作品',
-        'accessories': '书法配件',
-        'sets': '书法套装'
+        'brushes': 'Brushes',
+        'ink': 'Ink',
+        'paper': 'Rice Paper',
+        'calligraphy works': 'Calligraphy Works',
+        'accessories': 'Accessories',
+        'sets': 'Calligraphy Sets'
       };
       return categoryMap[category] || category;
     };
