@@ -145,14 +145,16 @@ export default {
   --secondary-color: #f10215;
   --accent-color: #fff;
   --text-color: #333;
-  --light-bg: #f6f6f6;
+  --light-bg: #f5f5f5;
   --border-color: #e3e4e5;
   --hover-color: #c81623;
-  --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  --hover-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   --border-radius: 2px;
-  --transition-speed: 0.3s;
+  --transition-speed: 0.2s;
   --container-width: 1190px;
+  --header-height: 100px;
+  --nav-height: 40px;
 }
 
 * {
@@ -215,21 +217,23 @@ body {
 /* Main header */
 .main-header {
   background-color: white;
-  height: 100px;
+  height: var(--header-height);
   display: flex;
   align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 
 .main-header .container {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0 10px;
 }
 
 .logo {
   width: 190px;
   height: 60px;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  background: var(--primary-color);
   color: white;
   font-size: 24px;
   font-weight: bold;

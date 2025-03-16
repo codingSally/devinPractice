@@ -310,8 +310,8 @@ export default {
 .product-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  margin-top: 15px;
+  gap: 15px;
+  margin-top: 20px;
 }
 
 .product-item {
@@ -320,9 +320,10 @@ export default {
   overflow: hidden;
   transition: all var(--transition-speed);
   cursor: pointer;
-  padding: 12px;
+  padding: 15px;
   position: relative;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: var(--card-shadow);
+  border: 1px solid transparent;
 }
 
 .product-item:hover {
@@ -429,22 +430,30 @@ export default {
 
 .empty-state {
   background-color: white;
-  padding: 30px;
+  padding: 40px 30px;
   border-radius: var(--border-radius);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-shadow: var(--card-shadow);
 }
 
 .empty-state-image {
   width: 200px;
   height: auto;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 .empty-state-text {
   margin-bottom: 30px;
+  max-width: 500px;
 }
 
 .empty-state-text h3 {
@@ -485,11 +494,12 @@ export default {
 }
 
 .recommendation-item {
-  background-color: #f8f8f8;
-  padding: 10px;
+  background-color: white;
+  padding: 12px;
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: all var(--transition-speed);
+  box-shadow: var(--card-shadow);
 }
 
 .recommendation-item:hover {
