@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.util.StringUtils;
+import redis.embedded.RedisServer;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -26,7 +27,7 @@ public class EmbeddedRedisConfig {
     @Value("${spring.redis.port:6379}")
     private int redisPort;
 
-    private redis.embedded.RedisServer redisServer;
+    private RedisServer redisServer;
 
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
@@ -42,7 +43,7 @@ public class EmbeddedRedisConfig {
         }
 
         try {
-            redisServer = redis.embedded.RedisServer.builder()
+            redisServer = RedisServer.builder()
                     .port(redisPort)
                     .setting("maxmemory 128M") // Limit memory usage
                     .build();
