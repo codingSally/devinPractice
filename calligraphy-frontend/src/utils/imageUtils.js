@@ -20,13 +20,13 @@ export function getCartoonImage(imageUrl) {
   
   // Define available product images
   const productImages = [
-    '/images/products/real_product_images_new/product1.svg',
-    '/images/products/real_product_images_new/product2.svg',
-    '/images/products/test_product_images/product1.svg',
-    '/images/products/test_product_images/product2.svg',
-    '/images/fox.jpg',
-    '/images/cat.jpg',
-    '/images/panda.jpg'
+    '/images/products/product1.jpg',
+    '/images/products/product2.jpg',
+    '/images/products/product3.jpg',
+    '/images/products/product4.jpg',
+    '/images/products/product5.jpg',
+    '/images/products/product6.jpg',
+    '/images/products/product7.jpg'
   ];
   
   // Assign specific images based on product ID hash to ensure consistency
