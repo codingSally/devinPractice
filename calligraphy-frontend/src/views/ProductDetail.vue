@@ -182,18 +182,121 @@ export default {
     const sendingMessage = ref(false);
     const quantity = ref(1);
     
+    // Mock products data with additional details for product detail page
+    const mockProducts = [
+      { 
+        productId: 1, 
+        productName: 'Calligraphy Brush Set', 
+        price: 29.99, 
+        imagePath: '/images/products/product1.jpg', 
+        category: 'brushes',
+        description: 'High-quality calligraphy brush set made from premium materials. Perfect for beginners and professionals alike. This set includes 5 brushes of different sizes to accommodate various calligraphy styles.',
+        inventory: 50
+      },
+      { 
+        productId: 2, 
+        productName: 'Premium Ink', 
+        price: 15.99, 
+        imagePath: '/images/products/product2.jpg', 
+        category: 'ink',
+        description: 'Premium quality ink specially formulated for calligraphy. Rich, deep color that flows smoothly and dries quickly without smudging. Ideal for all types of calligraphy work.',
+        inventory: 100
+      },
+      { 
+        productId: 3, 
+        productName: 'Rice Paper', 
+        price: 12.99, 
+        imagePath: '/images/products/product3.jpg', 
+        category: 'paper',
+        description: 'Traditional rice paper with the perfect texture and absorbency for calligraphy. Each sheet is handcrafted to ensure the highest quality. Pack contains 50 sheets.',
+        inventory: 75
+      },
+      { 
+        productId: 4, 
+        productName: 'Calligraphy Art - Harmony', 
+        price: 199.99, 
+        imagePath: '/images/products/product4.jpg', 
+        category: 'calligraphy works',
+        description: 'Beautiful calligraphy artwork featuring the character for "Harmony". Created by master calligrapher Wang Li using traditional techniques. Professionally framed and ready to hang.',
+        inventory: 5
+      },
+      { 
+        productId: 5, 
+        productName: 'Professional Brush Collection', 
+        price: 49.99, 
+        imagePath: '/images/products/product5.jpg', 
+        category: 'brushes',
+        description: 'Professional-grade brush collection for serious calligraphers. Includes 10 brushes of various sizes and styles, all handcrafted by master artisans using traditional methods.',
+        inventory: 30
+      },
+      { 
+        productId: 6, 
+        productName: 'Colored Ink Set', 
+        price: 24.99, 
+        imagePath: '/images/products/product6.jpg', 
+        category: 'ink',
+        description: 'Set of 8 vibrant colored inks for creative calligraphy projects. Each color is carefully formulated to maintain consistency and provide excellent coverage.',
+        inventory: 60
+      },
+      { 
+        productId: 7, 
+        productName: 'Bamboo Paper Scroll', 
+        price: 19.99, 
+        imagePath: '/images/products/product7.jpg', 
+        category: 'paper',
+        description: 'Traditional bamboo paper scroll, perfect for calligraphy practice or display. The scroll measures 1.5m in length and comes with mounting accessories.',
+        inventory: 40
+      },
+      { 
+        productId: 8, 
+        productName: 'Calligraphy Art - Serenity', 
+        price: 249.99, 
+        imagePath: '/images/products/product1.jpg', 
+        category: 'calligraphy works',
+        description: 'Exquisite calligraphy artwork featuring the character for "Serenity". Created by renowned calligrapher Chen Wei using ancient techniques passed down through generations.',
+        inventory: 3
+      },
+      { 
+        productId: 9, 
+        productName: 'Deluxe Calligraphy Set', 
+        price: 89.99, 
+        imagePath: '/images/products/product2.jpg', 
+        category: 'sets',
+        description: 'Complete calligraphy set for enthusiasts. Includes 8 brushes, 4 ink colors, rice paper, ink stone, and a beautiful wooden case. Perfect as a gift or for personal use.',
+        inventory: 25
+      },
+      { 
+        productId: 10, 
+        productName: 'Traditional Ink Stone', 
+        price: 59.99, 
+        imagePath: '/images/products/product3.jpg', 
+        category: 'accessories',
+        description: 'Handcrafted ink stone made from high-quality slate. The smooth grinding surface ensures perfect ink consistency. Comes with a protective wooden case.',
+        inventory: 15
+      }
+    ];
+    
     const fetchProduct = async () => {
-      const productId = route.params.id;
+      const productId = parseInt(route.params.id);
       loading.value = true;
       error.value = false;
       
       try {
-        const response = await axios.get(`/api/products/${productId}`);
-        product.value = response.data;
+        // Simulate API call with setTimeout
+        setTimeout(() => {
+          const foundProduct = mockProducts.find(p => p.productId === productId);
+          
+          if (foundProduct) {
+            product.value = foundProduct;
+          } else {
+            error.value = true;
+          }
+          
+          loading.value = false;
+        }, 500);
       } catch (err) {
         console.error('Error fetching product details:', err);
         error.value = true;
-      } finally {
         loading.value = false;
       }
     };
@@ -268,26 +371,29 @@ export default {
       // Show typing indicator
       sendingMessage.value = true;
       
-      try {
-        // Call backend chat API
-        const response = await axios.post(`/api/chat/product/${route.params.id}`, {
-          message: message
-        });
+      // Simulate API call with setTimeout
+      setTimeout(() => {
+        // Generate mock response based on user message
+        let responseMessage = 'Thank you for your message. How else can I help you with this product?';
+        
+        if (message.toLowerCase().includes('price')) {
+          responseMessage = `The price of ${product.value.productName} is ¥${product.value.price}. We offer discounts for bulk purchases.`;
+        } else if (message.toLowerCase().includes('delivery') || message.toLowerCase().includes('shipping')) {
+          responseMessage = 'We offer free shipping on orders over ¥99. Standard delivery takes 3-5 business days.';
+        } else if (message.toLowerCase().includes('discount') || message.toLowerCase().includes('coupon')) {
+          responseMessage = 'You can use coupon code CALLI10 for 10% off your first purchase.';
+        } else if (message.toLowerCase().includes('quality') || message.toLowerCase().includes('material')) {
+          responseMessage = `${product.value.productName} is made from premium materials to ensure the highest quality.`;
+        }
         
         // Add bot response to chat
         chatMessages.value.push({
           sender: 'bot',
-          content: response.data.message
+          content: responseMessage
         });
-      } catch (error) {
-        console.error('Error calling chat API:', error);
-        chatMessages.value.push({
-          sender: 'bot',
-          content: 'Sorry, I encountered an error. Please try again later.'
-        });
-      } finally {
+        
         sendingMessage.value = false;
-      }
+      }, 1000);
     };
     
     onMounted(() => {
@@ -308,7 +414,8 @@ export default {
       closeChatModal,
       sendMessage,
       getCartoonImage,
-      getCategoryName
+      getCategoryName,
+      mockProducts
     };
   }
 };
