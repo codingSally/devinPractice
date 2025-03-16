@@ -132,28 +132,46 @@ export default {
     const minPrice = ref(null);
     const maxPrice = ref(null);
     
+    // Mock products data for display
+    const mockProducts = [
+      { productId: 1, productName: 'Calligraphy Brush Set', price: 29.99, imagePath: '/images/products/product1.jpg', category: 'brushes' },
+      { productId: 2, productName: 'Premium Ink', price: 15.99, imagePath: '/images/products/product2.jpg', category: 'ink' },
+      { productId: 3, productName: 'Rice Paper', price: 12.99, imagePath: '/images/products/product3.jpg', category: 'paper' },
+      { productId: 4, productName: 'Calligraphy Art - Harmony', price: 199.99, imagePath: '/images/products/product4.jpg', category: 'calligraphy works' },
+      { productId: 5, productName: 'Professional Brush Collection', price: 49.99, imagePath: '/images/products/product5.jpg', category: 'brushes' },
+      { productId: 6, productName: 'Colored Ink Set', price: 24.99, imagePath: '/images/products/product6.jpg', category: 'ink' },
+      { productId: 7, productName: 'Bamboo Paper Scroll', price: 19.99, imagePath: '/images/products/product7.jpg', category: 'paper' },
+      { productId: 8, productName: 'Calligraphy Art - Serenity', price: 249.99, imagePath: '/images/products/product1.jpg', category: 'calligraphy works' },
+      { productId: 9, productName: 'Deluxe Calligraphy Set', price: 89.99, imagePath: '/images/products/product2.jpg', category: 'sets' },
+      { productId: 10, productName: 'Traditional Ink Stone', price: 59.99, imagePath: '/images/products/product3.jpg', category: 'accessories' }
+    ];
+    
     const fetchProducts = async () => {
       loading.value = true;
       try {
-        let url = '/api/products';
-        
-        // Apply category filter
-        if (categoryFilter.value) {
-          url = `/api/products/category/${categoryFilter.value}`;
-        }
-        
-        // Apply price filter
-        if (minPrice.value !== null && maxPrice.value !== null) {
-          url = `/api/products/price?min=${minPrice.value}&max=${maxPrice.value}`;
-        }
-        
-        const response = await axios.get(url);
-        products.value = response.data;
-        totalProducts.value = response.data.length;
+        // Use mock data instead of API call for demonstration
+        setTimeout(() => {
+          let filteredProducts = [...mockProducts];
+          
+          // Apply category filter
+          if (categoryFilter.value) {
+            filteredProducts = filteredProducts.filter(p => p.category === categoryFilter.value);
+          }
+          
+          // Apply price filter
+          if (minPrice.value !== null && maxPrice.value !== null) {
+            filteredProducts = filteredProducts.filter(p => 
+              p.price >= minPrice.value && p.price <= maxPrice.value
+            );
+          }
+          
+          products.value = filteredProducts;
+          totalProducts.value = filteredProducts.length;
+          loading.value = false;
+        }, 500);
       } catch (error) {
        console.error('Error fetching products:', error);
-      } finally {
-        loading.value = false;
+       loading.value = false;
       }
     };
     
