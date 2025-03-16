@@ -19,12 +19,8 @@ import java.time.Duration;
 @EnableCaching
 public class RedisConfig {
 
-    @Bean
-    public LettuceConnectionFactory redisConnectionFactory() {
-        // For development, we'll use localhost Redis
-        // In production, this would be configured with proper host/port
-        return new LettuceConnectionFactory();
-    }
+    // Removed redisConnectionFactory bean to avoid conflict with EmbeddedRedisConfig
+    // We'll use the connection factory defined in EmbeddedRedisConfig
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
