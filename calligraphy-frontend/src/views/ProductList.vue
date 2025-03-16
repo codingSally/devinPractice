@@ -1,17 +1,13 @@
 <template>
   <div class="product-list-page">
-    <!-- Banner carousel (JD style) -->
-    <div class="banner-carousel">
-      <img src="../images/banner1.jpg" alt="Banner" class="banner-image" />
-    </div>
     
     <!-- Filters section (JD.com style) -->
     <div class="filters-section">
       <div class="container">
         <div class="filters">
-          <div class="filter-row">
-            <div class="filter-label">Category:</div>
-            <div class="filter-options">
+          <div class="filters-row">
+            <div class="filter-group">
+              <div class="filter-label">Category:</div>
               <a-select
                 v-model:value="categoryFilter"
                 placeholder="All Categories"
@@ -28,11 +24,9 @@
                 <a-select-option value="sets">Calligraphy Sets</a-select-option>
               </a-select>
             </div>
-          </div>
-          
-          <div class="filter-row">
-            <div class="filter-label">Price:</div>
-            <div class="filter-options">
+            
+            <div class="filter-group">
+              <div class="filter-label">Price:</div>
               <div class="price-range">
                 <a-input-number
                   v-model:value="minPrice"
@@ -50,11 +44,11 @@
                 <a-button type="primary" class="price-btn" @click="applyFilters">Apply</a-button>
               </div>
             </div>
-          </div>
-          
-          <div class="filter-actions">
-            <a-button type="primary" class="filter-btn" @click="applyFilters">Apply Filters</a-button>
-            <a-button class="reset-btn" @click="resetFilters">Reset</a-button>
+            
+            <div class="filter-actions">
+              <a-button type="primary" class="filter-btn" @click="applyFilters">Apply Filters</a-button>
+              <a-button class="reset-btn" @click="resetFilters">Reset</a-button>
+            </div>
           </div>
         </div>
       </div>
@@ -76,7 +70,7 @@
               <div class="recommendation-items">
                 <div class="recommendation-item" v-for="i in 4" :key="i" @click="resetFilters">
                   <div class="rec-image">
-                    <img :src="`/images/products/test_product_images/product${(i % 2) + 1}.svg`" :alt="`Recommendation ${i}`" />
+                    <img :src="`/images/products/product${i}.jpg`" :alt="`Recommendation ${i}`" />
                   </div>
                   <div class="rec-name">Recommended Product {{i}}</div>
                   <div class="rec-price">¥{{99 + (i * 10)}}</div>
@@ -235,33 +229,34 @@ export default {
 
 .filters-section {
   background-color: white;
-  padding: 15px 0;
+  padding: 10px 0;
   margin-bottom: 20px;
   box-shadow: var(--card-shadow);
   border-radius: 4px;
 }
 
 .filters {
-  padding: 15px;
+  padding: 10px 15px;
 }
 
-.filter-row {
+.filters-row {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
+  flex-wrap: nowrap;
+  gap: 20px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
 }
 
 .filter-label {
-  width: 80px;
+  margin-right: 10px;
   color: #666;
   font-size: 14px;
   font-weight: 500;
-}
-
-.filter-options {
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
+  white-space: nowrap;
 }
 
 .jd-select {
@@ -274,24 +269,25 @@ export default {
 }
 
 .price-input {
-  width: 100px;
+  width: 80px;
 }
 
 .price-separator {
-  margin: 0 10px;
+  margin: 0 8px;
   color: #999;
 }
 
 .price-btn {
-  margin-left: 10px;
+  margin-left: 8px;
   background-color: var(--primary-color);
   border-color: var(--primary-color);
+  height: 32px;
+  padding: 0 12px;
 }
 
 .filter-actions {
-  margin-top: 20px;
   display: flex;
-  justify-content: flex-end;
+  margin-left: auto;
 }
 
 .filter-btn {
@@ -514,12 +510,15 @@ export default {
   align-items: center;
   justify-content: center;
   margin-bottom: 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
 }
 
 .rec-image img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+  opacity: 0.8;
 }
 
 .rec-name {
