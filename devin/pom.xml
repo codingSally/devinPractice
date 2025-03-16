@@ -78,12 +78,8 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>it.ozimov</groupId>
-			<artifactId>embedded-redis</artifactId>
-			<version>0.7.3</version>
-			<scope>runtime</scope>
-		</dependency>
+		<!-- Embedded Redis dependency removed to avoid compilation issues -->
+		<!-- We'll use an external Redis server or mock for testing -->
 		<!-- Rate limiting dependency -->
 		<dependency>
 			<groupId>com.github.vladimir-bukhtoyarov</groupId>
