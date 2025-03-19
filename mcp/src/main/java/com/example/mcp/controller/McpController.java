@@ -8,6 +8,11 @@ import com.example.mcp.model.Prompt;
 import com.example.mcp.model.RpcRequest;
 import com.example.mcp.model.RpcResponse;
 
+import com.example.mcp.mcp.server.McpSyncServer;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,15 +28,25 @@ public class McpController {
     private final DatabaseService databaseService;
     private final RpcService rpcService;
     private final PromptService promptService;
+    private final McpSyncServer mcpSyncServer;
 
     @Autowired
     public McpController(
             DatabaseService databaseService,
             RpcService rpcService,
-            PromptService promptService) {
+            PromptService promptService,
+            McpSyncServer mcpSyncServer) {
         this.databaseService = databaseService;
         this.rpcService = rpcService;
         this.promptService = promptService;
+        this.mcpSyncServer = mcpSyncServer;
+    }
+    
+    @PostConstruct
+    public void init() {
+        // Initialize the MCP server
+        mcpSyncServer.start();
+        System.out.println("MCP Server initialized at " + System.currentTimeMillis());
     }
 
     // Database Resource Endpoints
@@ -97,5 +112,11 @@ public class McpController {
         
         response.put("messages", List.of(message));
         return ResponseEntity.ok(response);
+    }
+    
+    @RequestMapping("/connect")
+    public void handleMcpRequest(HttpServletRequest request, HttpServletResponse response) {
+        // The actual handling is done by the HttpServletSseServerTransport
+        // This endpoint is just a placeholder
     }
 }
