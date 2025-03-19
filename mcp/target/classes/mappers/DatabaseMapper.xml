@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcp.mapper.DatabaseMapper">
+    <resultMap id="databaseEntityMap" type="com.example.mcp.model.DatabaseEntity">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="value" column="value"/>
+    </resultMap>
+    
+    <select id="findById" resultMap="databaseEntityMap">
+        SELECT id, name, value
+        FROM database_entity
+        WHERE id = #{id}
+    </select>
+    
+    <select id="findAll" resultMap="databaseEntityMap">
+        SELECT id, name, value
+        FROM database_entity
+    </select>
+    
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO database_entity (name, value)
+        VALUES (#{name}, #{value})
+    </insert>
+    
+    <update id="update">
+        UPDATE database_entity
+        SET name = #{name}, value = #{value}
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="delete">
+        DELETE FROM database_entity
+        WHERE id = #{id}
+    </delete>
+</mapper>

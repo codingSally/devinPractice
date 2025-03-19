@@ -2,6 +2,7 @@ package com.example.mcp.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -12,7 +13,8 @@ public class RestClientConfig {
     private static final int READ_TIMEOUT = 10000; // 10 seconds
     
     @Bean
-    public RestTemplate restTemplate() {
+    @Primary
+    public RestTemplate restTemplateWithTimeout() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(CONNECT_TIMEOUT);
         factory.setReadTimeout(READ_TIMEOUT);
